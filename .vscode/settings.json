@@ -1,6 +1,0 @@
-{
-    "terminal.integrated.env.windows": {
-      "PATH": "D:\\Apps\\NodeJS;${env:PATH}"
-    },
-    "liveServer.settings.port": 6971
-}  
