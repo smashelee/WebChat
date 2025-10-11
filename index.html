@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="violet-amethyst">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>WebChat</title>
+  
+  <link rel="icon" type="image/png" href="public/Images/web.png" style="filter: invert(1);">
+  <link rel="apple-touch-icon" href="public/Images/web.png" style="filter: invert(1);">
+  
+  <link rel="stylesheet" href="public/css/normalize.css">
+  <link rel="stylesheet" href="public/css/styles.module.css">
+  <link rel="stylesheet" href="public/css/themes.module.css">
+  <link rel="stylesheet" href="public/css/mobile.css">
+  
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('savedTheme') || 'violet-amethyst';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+  
+</head>
+<body>
+  <div id="toast-container"></div>
+  <div id="modal-overlay" class="modal-overlay"></div>
+  <div id="confirm-action-modal" class="confirm-modal">
+    <h3 id="confirm-title">Подтвердите действие</h3>
+    <p id="confirm-message">Пожалуйста, заполните все обязательные поля</p>
+    <div class="confirm-actions">
+      <button id="confirm-action" class="confirm-button primary">OK</button>
+      <button id="cancel-action" class="confirm-button">Закрыть</button>
+    </div>
+  </div>
+  
+  <div id="admin-confirm-modal" class="confirm-modal">
+    <h3 id="admin-confirm-title">Вход для администратора</h3>
+    <p id="admin-confirm-message">Для входа под этим именем требуется пароль администратора.</p>
+    <div class="formGroup">
+      <input type="password" id="admin-password-input" class="formInput" placeholder="Введите пароль" autocomplete="current-password">
+    </div>
+    <div class="confirm-actions">
+      <button id="admin-confirm-action" class="confirm-button primary">Войти</button>
+      <button id="admin-cancel-action" class="confirm-button">Закрыть</button>
+    </div>
+  </div>
+  
+  <div id="settings-modal" class="confirm-modal">
+    <h3 id="settings-title">Настройки</h3>
+    <div class="formGroup">
+      <label class="formLabel">Тема оформления</label>
+      <div class="theme-category-buttons">
+        <button id="single-color-btn" class="theme-category-btn active">
+          🎨 Одноцветные
+        </button>
+        <button id="multi-color-btn" class="theme-category-btn">
+          🌈 Многоцветные
+        </button>
+      </div>
+      <div class="custom-select-wrapper">
+        <div id="custom-select" class="custom-select">
+          <div id="custom-select-trigger" class="custom-select__trigger">
+            <span>💜 Аметистовый фиолет</span>
+            <div class="arrow"></div>
+          </div>
+          <div id="custom-options" class="custom-options">
+          </div>
+        </div>
+      </div>
+    </div>
+      <div class="formGroup">
+        <div id="bg-particles-setting">
+          <div class="uv-checkbox-wrapper">
+            <input type="checkbox" id="uv-checkbox" class="uv-checkbox" />
+            <label for="uv-checkbox" class="uv-checkbox-label">
+              <div class="uv-checkbox-icon">
+                <svg viewBox="0 0 24 24" class="uv-checkmark">
+                  <path d="M4.1,12.7 9,17.6 20.3,6.3" fill="none"></path>
+                </svg>
+              </div>
+              <span class="uv-checkbox-text">Частицы</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    <div class="confirm-actions">
+      <button id="settings-close-button" class="confirm-button primary">Закрыть</button>
+    </div>
+  </div>
+  
+  <div id="moderator-confirm-modal" class="confirm-modal" style="display:none;">
+    <h3>Вход для модератора</h3>
+    <p id="admin-confirm-message">Для входа под этим именем требуется пароль модератора.</p>
+    <input id="moderator-password-input" type="password" placeholder="Пароль модератора" class="formInput" />
+    <div class="confirm-actions">
+      <button id="moderator-confirm-action" class="confirm-button primary">Войти</button>
+      <button id="moderator-cancel-action" class="confirm-button">Закрыть</button>
+    </div>
+  </div>
+  
+  <div id="attach-modal" class="confirm-modal" style="display:none;">
+    <h3 id="attach-title">Прикрепить файл</h3>
+    <p id="attach-message">Выберите действие для прикрепления файлов</p>
+    <div id="attach-actions" class="confirm-actions">
+      <button id="attach-file-button" class="confirm-button primary">Отправить файл</button>
+      <button id="attach-cancel-button" class="confirm-button">Закрыть</button>
+    </div>
+  </div>
+  
+  <div id="login-form" class="loginForm">
+    <div class="formHeader">
+      <div class="appIcon">
+        <div class="spinner">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+      <div class="title-container">
+        <h2 class="formTitle">WebChat</h2>
+        <p class="subtitle">Тестовый веб-мессенджер</p>
+      </div>
+    </div>
+
+    <form>
+      <div class="formGroup">
+        <label class="formLabel" for="username-input">Имя пользователя</label>
+        <input type="text" id="username-input" class="formInput" placeholder="Введите ваше имя" autocomplete="off" pattern="[a-zA-Z0-9_-]+" title="Только английские буквы, цифры, дефис и подчеркивание" maxlength="10">
+      </div>
+      
+      <div class="formGroup">
+        <label class="formLabel" for="display-name-input">Отображаемое имя</label>
+        <input type="text" id="display-name-input" class="formInput" placeholder="Как вас будут видеть другие" autocomplete="off" maxlength="20">
+      </div>
+      
+      <div id="tunnel-input-group" class="formGroup">
+        <label class="formLabel" for="tunnel-url">Адрес сервера</label>
+        <input type="text" id="tunnel-url" class="formInput" placeholder="URL сервера" autocomplete="off">
+      </div>
+      
+      <button type="button" id="settings-button" class="settings-button-footer" style="margin-bottom: 10px;">
+        Настройки
+      </button>
+      <button type="submit" id="login-button" class="submitButton">
+        Войти
+      </button>
+      
+      <div class="version-info">Версия 0.0.63</div>
+      
+      <div class="dev-info">
+        <span class="lead-dev">Авторы: @smashelee</span> 
+        <span class="other-dev">@valleriiaq</span>
+      </div>
+    </form>
+  </div>
+  
+  <div id="chat-container" class="container" style="display: none;">
+    <div class="mainLayout">
+      <div class="sidebar">
+        <div class="sidebarHeader">
+          <div class="headerContent">
+            <span>Участники чата</span>
+          </div>
+        </div>
+        
+        <div class="usersList">
+        </div>
+      </div>
+      
+      <div class="chatArea">
+        <div class="chatHeader">
+          <div class="chatHeaderGroupInfo">
+            <span id="group-name">Группа</span>
+          </div>
+          <div class="chatHeaderUserInfo">
+            <img id="current-user-avatar" src="public/Images/user.png" alt="User" class="userAvatar">
+            <div class="user-name-container">
+              <span id="current-user-name" class="editable-display-name">Никнейм</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="messagesContainer"></div>
+        <div id="typing-indicator" class="typingIndicator"></div>
+        
+        <div class="inputArea">
+          <div class="messageInput">
+            <button id="attach-button" class="inputButton attachButton" title="Прикрепить файл">
+              <img src="public/Images/attach.png" alt="Attach" class="inputButtonIcon">
+            </button>
+            <textarea id="message-input" class="input_top" placeholder="Введите сообщение..."></textarea>
+            <button id="emoji-button" class="inputButton emojiButton" title="GIF и смайлики">
+              <img src="public/Images/gif.png" alt="GIF" class="inputButtonIcon">
+            </button>
+            <button id="send-button" class="inputButton sendButton">
+              <img src="public/Images/send.png" alt="Send" class="inputButtonIcon">
+            </button>
+          </div>
+        </div>
+        
+        <div id="gif-modal" class="gifModal" style="display: none;">
+          <div class="gifModalOverlay"></div>
+          <div class="gifModalContent">
+            <div class="gifModalHeader">
+              <h3>GIF и смайлики</h3>
+              <button id="close-gif-modal" class="closeGifModal">×</button>
+            </div>
+            <div class="gifModalSearchContainer">
+              <div class="gifModalSearchInput">
+                <textarea id="gif-modal-search-input" class="input_top" placeholder="Поиск GIF..."></textarea>
+                <button id="gif-modal-search-button" class="inputButton searchButton">
+                  <img src="public/Images/search.png" alt="Search" class="inputButtonIcon">
+                </button>
+              </div>
+            </div>
+            <div id="gif-modal-results" class="gifModalResults">
+              <div class="gifModalLoading" style="display: none;">Загрузка...</div>
+              <div class="gifModalNoResults" style="display: none;">Ничего не найдено</div>
+            </div>
+          </div>
+        </div>
+        
+        <button id="scroll-to-bottom-button" class="scrollToBottomButton" title="Прокрутить вниз" style="display: none;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  
+  <script src="public/js/main.js"></script>
+  <script src="public/js/modals.js"></script>
+  <script src="public/js/cards.js"></script>
+  <script src="public/js/socket.js"></script>
+  <script src="public/js/mobile.js"></script>
+  <script src="public/js/particles.js"></script>
+  
+</body>
+</html>
