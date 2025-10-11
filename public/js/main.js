@@ -1,4 +1,3 @@
-// ======== Применение темы ========
 function applyTheme(themeName) {
   document.documentElement.setAttribute('data-theme', themeName);
   
@@ -34,13 +33,11 @@ function applyTheme(themeName) {
   }
 }
 
-// ======== Сохранение имени пользователя и темы ========
 function saveUsernameAndTheme(username, theme) {
   localStorage.setItem('savedUsername', username);
   localStorage.setItem('savedTheme', theme);
 }
 
-// ======== Инициализация приложения ========
 function initApp() {
   const activeCategory = localStorage.getItem('activeThemeCategory');
   let savedTheme = null;
@@ -62,25 +59,21 @@ function initApp() {
   }
 }
 
-// ======== Показать модальное окно с оверлеем ========
 function showModalWithOverlay(modal) {
   const overlay = document.getElementById('modal-overlay');
   overlay.style.display = 'block';
   modal.style.display = 'block';
 }
 
-// ======== Скрыть модальное окно с оверлеем ========
 function hideModalWithOverlay(modal) {
   const overlay = document.getElementById('modal-overlay');
   overlay.style.display = 'none';
   modal.style.display = 'none';
 }
 
-// ======== Настройка селектора тем ========
 function setupThemeSelector() {
 }
 
-// ======== Настройка модальных окон ========
 function setupModals() {
   const overlay = document.getElementById('modal-overlay');
   const confirmModal = document.getElementById('confirm-action-modal');
@@ -134,7 +127,6 @@ function setupModals() {
 }
 
 
-// ======== Управление локальным хранилищем ========
 function loadSavedData() {
   const savedUser = localStorage.getItem('savedUser');
   if (savedUser) {
@@ -168,7 +160,6 @@ function loadSavedData() {
   }
 }
 
-// ======== Настройка формы входа ========
 function setupLoginForm() {
   const loginForm = document.getElementById('login-form');
   const usernameInput = document.getElementById('username-input');
@@ -227,7 +218,6 @@ function setupLoginForm() {
   });
 }
 
-// ======== Интерактивный куб ========
 const cube = document.querySelector('.spinner');
 let rotX = 0, rotY = 0;
 let autoRotX = Math.random() * 360, autoRotY = Math.random() * 360;
@@ -304,7 +294,6 @@ cube.addEventListener('touchend', () => {
 updateCube();
 startAutoRotate();
 
-// ======== Инициализация при загрузке DOM ========
 document.addEventListener('DOMContentLoaded', () => {
   initApp();
   setupModals();

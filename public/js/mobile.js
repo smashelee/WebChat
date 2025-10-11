@@ -1,11 +1,9 @@
-// ======== Проверить мобильное устройство ========
 function isMobileDevice() {
   const isMobile = window.innerWidth <= 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   console.log('isMobileDevice:', isMobile, 'width:', window.innerWidth, 'userAgent:', navigator.userAgent);
   return isMobile;
 }
 
-// ======== Настроить мобильный интерфейс ========
 function setupMobileInterface() {
   const isMobile = isMobileDevice();
   if (!isMobile) return;
@@ -18,7 +16,6 @@ function setupMobileInterface() {
   disableBodyScroll();
 }
 
-// ======== Создать мобильные элементы ========
 function createMobileElements() {
   const isMobile = isMobileDevice();
   if (!isMobile) return;
@@ -49,7 +46,6 @@ function createMobileElements() {
   
 }
 
-// ======== Настроить переключение боковой панели ========
 function setupSidebarToggle() {
   const sidebar = document.querySelector('.sidebar');
   const overlay = document.querySelector('.sidebar-overlay');
@@ -75,7 +71,6 @@ function setupSidebarToggle() {
   }
 }
 
-// ======== Обработать изменение размера ========
 function handleResize() {
   const isMobile = isMobileDevice();
   const sidebar = document.querySelector('.sidebar');
@@ -105,7 +100,6 @@ function handleResize() {
   }
 }
 
-// ======== Отключить прокрутку тела ========
 function disableBodyScroll() {
   document.body.style.overflow = 'hidden';
   document.documentElement.style.overflow = 'hidden';
@@ -132,7 +126,6 @@ function disableBodyScroll() {
   }
 }
 
-// ======== Предотвратить прокрутку тела ========
 function preventBodyScroll(e) {
   const messagesContainer = document.querySelector('.messagesContainer');
   const chatArea = document.querySelector('.chatArea');
@@ -173,7 +166,6 @@ function preventBodyScroll(e) {
   e.preventDefault();
 }
 
-// ======== Включить запрет прокрутки ========
 function enableNoScroll() {
   document.body.addEventListener('touchmove', function(e) {
     if (!e.target.closest('.chatArea') && !e.target.closest('.messagesContainer')) {
@@ -182,7 +174,6 @@ function enableNoScroll() {
   }, { passive: false });
 }
 
-// ======== Отключить запрет прокрутки ========
 function disableNoScroll() {
   document.body.removeEventListener('touchmove', function(e) {
     if (!e.target.closest('.chatArea') && !e.target.closest('.messagesContainer')) {
@@ -191,7 +182,6 @@ function disableNoScroll() {
   }, { passive: false });
 }
 
-// ======== Улучшить мобильный вход ========
 function enhanceMobileLogin() {
   const loginForm = document.querySelector('.loginForm');
   if (!loginForm) return;
@@ -208,7 +198,6 @@ function enhanceMobileLogin() {
   enhanceMobileAvatarSelection();
 }
 
-// ======== Улучшить выбор аватара на мобильных ========
 function enhanceMobileAvatarSelection() {
   const showMoreBtn = document.getElementById('show-more-avatars');
   if (!showMoreBtn) return;
@@ -240,7 +229,6 @@ function enhanceMobileAvatarSelection() {
   });
 }
 
-// ======== Добавить обработку ориентации ========
 function addOrientationHandling() { 
   const main = document.querySelector('.mainLayout');
   if (!main) return;
@@ -254,7 +242,6 @@ function addOrientationHandling() {
   });
 }
 
-// ======== Настроить адаптацию под клавиатуру ========
 function setupKeyboardHandling() {
   const messageInput = document.getElementById('message-input');
 
@@ -322,7 +309,6 @@ function setupKeyboardHandling() {
   });
 }
 
-// ======== Адаптировать макет под клавиатуру ========
 let layoutAdjustmentTimeout = null;
 let isLayoutAdjusted = false;
 
@@ -429,7 +415,6 @@ function adjustLayoutForKeyboard(event) {
   }, 100);
 }
 
-// ======== Сбросить макет ========
 function resetLayout() {
   if (!isMobileDevice()) return;
   
@@ -492,7 +477,6 @@ function resetLayout() {
   disableNoScroll();
 }
 
-// ======== Настроить динамические элементы пользователей ========
 function setupDynamicUserItems() {
   const observer = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
@@ -522,7 +506,6 @@ function setupDynamicUserItems() {
   }
 }
 
-// ======== Настроить наблюдение за контейнером чата ========
 function setupChatContainerObserver() {
   const observer = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
@@ -544,7 +527,6 @@ function setupChatContainerObserver() {
   }
 }
 
-// ======== Инициализация при загрузке DOM ========
 document.addEventListener('DOMContentLoaded', function() {
   setupMobileInterface();
   setupDynamicUserItems();

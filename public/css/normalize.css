@@ -1,4 +1,3 @@
-/* ===== БАЗОВЫЕ СТИЛИ ===== */
 html {
   line-height: 1.15;
   -webkit-text-size-adjust: 100%;
@@ -21,7 +20,6 @@ body {
   min-height: 100vh;
 }
 
-/* ===== СЕМАНТИЧЕСКИЕ ЭЛЕМЕНТЫ ===== */
 main {
   display: block;
 }
@@ -30,7 +28,6 @@ section, article, aside, nav, header, footer {
   display: block;
 }
 
-/* ===== ЗАГОЛОВКИ ===== */
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
   font-weight: 600;
@@ -44,7 +41,6 @@ h4 { font-size: 1.5rem; }
 h5 { font-size: 1.25rem; }
 h6 { font-size: 1rem; }
 
-/* ===== ТЕКСТОВЫЕ ЭЛЕМЕНТЫ ===== */
 p {
   margin: 0 0 1rem 0;
 }
@@ -115,7 +111,6 @@ sup {
   top: -0.5em;
 }
 
-/* ===== МЕДИА ЭЛЕМЕНТЫ ===== */
 img, svg, video, canvas, audio, iframe, embed, object {
   display: block;
   max-width: 100%;
@@ -132,7 +127,6 @@ svg {
   vertical-align: middle;
 }
 
-/* ===== ФОРМЫ ===== */
 button, input, optgroup, select, textarea {
   font-family: inherit;
   font-size: 100%;
@@ -267,7 +261,6 @@ textarea {
   cursor: pointer;
 }
 
-/* ===== СПЕЦИАЛЬНЫЕ ЭЛЕМЕНТЫ ===== */
 details {
   display: block;
   margin: 0 0 1rem 0;
@@ -310,7 +303,6 @@ template {
   display: none !important;
 }
 
-/* ===== СПИСКИ ===== */
 ul, ol {
   margin: 0 0 1rem 0;
   padding-left: 2rem;
@@ -320,7 +312,6 @@ li {
   margin: 0.25rem 0;
 }
 
-/* ===== ТАБЛИЦЫ ===== */
 table {
   border-collapse: collapse;
   border-spacing: 0;
@@ -339,7 +330,6 @@ th {
   background-color: #f8f9fa;
 }
 
-/* ===== РАЗДЕЛИТЕЛИ ===== */
 hr {
   box-sizing: content-box;
   height: 0;
@@ -349,7 +339,6 @@ hr {
   margin: 2rem 0;
 }
 
-/* ===== УЛУЧШЕНИЯ ДОСТУПНОСТИ ===== */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -368,13 +357,11 @@ hr {
   }
 }
 
-/* ===== ФОКУС ДЛЯ КЛАВИАТУРЫ ===== */
 :focus-visible {
   outline: 2px solid #007bff;
   outline-offset: 2px;
 }
 
-/* ===== БАЗОВАЯ ТИПОГРАФИКА ===== */
 blockquote {
   margin: 0 0 1rem 0;
   padding: 0.5rem 1rem;
@@ -383,7 +370,6 @@ blockquote {
   font-style: italic;
 }
 
-/* ===== УТИЛИТЫ ===== */
 * {
   box-sizing: border-box;
 }
@@ -392,12 +378,10 @@ html, body {
   height: 100%;
 }
 
-/* ===== УЛУЧШЕНИЯ ПРОИЗВОДИТЕЛЬНОСТИ ===== */
 img, video {
   will-change: auto;
 }
 
-/* ===== ПОДДЕРЖКА СОВРЕМЕННЫХ БРАУЗЕРОВ ===== */
 @supports (display: grid) {
   .grid {
     display: grid;

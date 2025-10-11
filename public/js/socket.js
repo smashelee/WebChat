@@ -1,5 +1,3 @@
-// ======== Переменные для файлов ========
-
 let socket = null;
 let connectionAttempts = 0;
 const MAX_RETRY_ATTEMPTS = 3;
@@ -41,7 +39,6 @@ const MAX_GROUP_NAME_LENGTH = 16;
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_REPLY_TEXT_LENGTH = 100;  
 
-// ======== Добавить значок администратора ========
 function addAdminBadge(parentElement) { 
   const adminBadge = document.createElement('img');
   adminBadge.src = 'public/Images/verified.png';
@@ -55,7 +52,6 @@ function addAdminBadge(parentElement) {
   adminBadge.addEventListener('mouseleave', hideCustomTooltip);
 }
 
-// ======== Добавить значок модератора ========
 function addModeratorBadge(parentElement) {
   const moderatorBadge = document.createElement('img');
   moderatorBadge.src = 'public/Images/moderator.png';
@@ -68,7 +64,6 @@ function addModeratorBadge(parentElement) {
   moderatorBadge.addEventListener('mouseleave', hideCustomTooltip);
 }
 
-// ======== Добавить значок премиум пользователя ========
 function addPremiumBadge(parentElement) {
   const premiumBadge = document.createElement('img');
   premiumBadge.src = 'public/Images/premium.png';
@@ -82,11 +77,9 @@ function addPremiumBadge(parentElement) {
   premiumBadge.addEventListener('mouseleave', hideCustomTooltip);
 }
 
-// ======== Tenor API конфигурация ========
 const TENOR_API_KEY = 'AIzaSyD4j1JR3uz3RxZvkIS4JNVZFk_EPvImmC0';
 const TENOR_BASE_URL = 'https://tenor.googleapis.com/v2/search';
 
-// ======== Управление панелью GIF ========
 function toggleGifPanel() {
   const gifModal = document.getElementById('gif-modal');
   if (gifModal.style.display === 'none' || gifModal.style.display === '') {
@@ -111,7 +104,6 @@ function hideGifPanel() {
   }
 }
 
-// ======== Загрузка популярных GIF для модали ========
 async function loadTrendingGifsModal() {
   const resultsContainer = document.getElementById('gif-modal-results');
   const loadingElement = resultsContainer.querySelector('.gifModalLoading');
@@ -143,7 +135,6 @@ async function loadTrendingGifsModal() {
   }
 }
 
-// ======== Поиск GIF для модали ========
 async function searchGifsModal(query) {
   if (!query.trim()) {
     loadTrendingGifsModal();
@@ -180,7 +171,6 @@ async function searchGifsModal(query) {
   }
 }
 
-// ======== Отображение результатов GIF для модали ========
 function displayGifResultsModal(gifs) {
   const resultsContainer = document.getElementById('gif-modal-results');
   const loadingElement = resultsContainer.querySelector('.gifModalLoading');
@@ -212,9 +202,6 @@ function displayGifResultsModal(gifs) {
   });
 }
 
-
-
-// ======== Выбор GIF ========
 function selectGif(gif) {
   const gifFile = {
     name: `${gif.content_description || 'gif'}.gif`,
@@ -236,7 +223,6 @@ function selectGif(gif) {
   }
 }
 
-// ======== Отправка GIF сообщения ========
 function sendGifMessage(gifFile) {
   if (!socket) {
     return;
@@ -264,7 +250,6 @@ function sendGifMessage(gifFile) {
     }
   };
   
-  
   if (!window.__pendingClientMessageIds) window.__pendingClientMessageIds = new Set();
   const clientMessageId = Date.now() + Math.random();
   messageData.clientMessageId = clientMessageId;
@@ -274,7 +259,6 @@ function sendGifMessage(gifFile) {
     event: 'chatMessage',
     data: messageData
   }));
-  
   
   const messageInput = document.getElementById('message-input');
   if (messageInput) {
@@ -291,14 +275,12 @@ function sendGifMessage(gifFile) {
   }
 }
 
-// ======== Добавить файл в сообщение ========
 function addFileToMessage(file) {
   attachedFiles.push(file);
   
   updateFilePreview();
 }
 
-// ======== Обработать ссылки в тексте сообщения ========
 function processLinksInText(text) {
   const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}[^\s]*)/g;
   
@@ -323,7 +305,6 @@ function processLinksInText(text) {
   });
 }
 
-// ======== Создать элемент сообщения ========
 function createMessageElement(message, isMyMessage, isNewMessage = true) {
   const messageWrapper = document.createElement('div');
   
@@ -917,7 +898,6 @@ function createMessageElement(message, isMyMessage, isNewMessage = true) {
   return messageWrapper;
 }
 
-// ======== Показать меню сообщения ========
 function showMessageMenu(messageId, x, y) {
   closeMessageMenu();
 
@@ -939,10 +919,9 @@ function showMessageMenu(messageId, x, y) {
   if (isMobile) {
     menu.classList.add('mobile');
     
-    // Позиционируем меню ниже сообщения, а не в позиции касания
     const messageRect = messageWrapper.getBoundingClientRect();
     const menuX = messageRect.left + (messageRect.width / 2);
-    const menuY = messageRect.bottom + 10; // 10px отступ от нижнего края сообщения
+    const menuY = messageRect.bottom + 10;
     
     menu.style.left = `${menuX}px`;
     menu.style.top = `${menuY}px`;
@@ -951,7 +930,6 @@ function showMessageMenu(messageId, x, y) {
     setTimeout(() => {
       const menuRect = menu.getBoundingClientRect();
       
-      // Проверяем горизонтальные границы
       if (menuRect.left < 10) {
         menu.style.left = '10px';
         menu.style.transform = 'translateX(0)';
@@ -960,9 +938,7 @@ function showMessageMenu(messageId, x, y) {
         menu.style.transform = 'translateX(-100%)';
       }
       
-      // Проверяем вертикальные границы
       if (menuRect.bottom > window.innerHeight - 10) {
-        // Если меню не помещается снизу, показываем его сверху сообщения
         menu.style.top = `${messageRect.top - menuRect.height - 10}px`;
       }
     }, 0);
@@ -1037,7 +1013,6 @@ function showMessageMenu(messageId, x, y) {
   }, 10);
 }
 
-// ======== Закрыть меню сообщения ========
 function closeMessageMenu() {
   if (activeMessageMenu && activeMessageMenu.menu) {
     if (document.body.contains(activeMessageMenu.menu)) {
@@ -1051,7 +1026,6 @@ function closeMessageMenu() {
   }
 }
 
-// ======== Показать контекстное меню файла ========
 function showFileContextMenu(messageId, fileIndex, x, y) {
   closeMessageMenu();
   
@@ -1072,10 +1046,9 @@ function showFileContextMenu(messageId, fileIndex, x, y) {
   if (isMobile) {
     menu.classList.add('mobile');
     
-    // Позиционируем меню файла ниже самого файла
     const fileRect = fileElement.getBoundingClientRect();
     const menuX = fileRect.left + (fileRect.width / 2);
-    const menuY = fileRect.bottom + 10; // 10px отступ от нижнего края файла
+    const menuY = fileRect.bottom + 10;
     
     menu.style.left = `${menuX}px`;
     menu.style.top = `${menuY}px`;
@@ -1084,7 +1057,6 @@ function showFileContextMenu(messageId, fileIndex, x, y) {
     setTimeout(() => {
       const menuRect = menu.getBoundingClientRect();
       
-      // Проверяем горизонтальные границы
       if (menuRect.left < 10) {
         menu.style.left = '10px';
         menu.style.transform = 'translateX(0)';
@@ -1093,9 +1065,7 @@ function showFileContextMenu(messageId, fileIndex, x, y) {
         menu.style.transform = 'translateX(-100%)';
       }
       
-      // Проверяем вертикальные границы
       if (menuRect.bottom > window.innerHeight - 10) {
-        // Если меню не помещается снизу, показываем его сверху файла
         menu.style.top = `${fileRect.top - menuRect.height - 10}px`;
       }
       
@@ -1161,7 +1131,6 @@ function showFileContextMenu(messageId, fileIndex, x, y) {
   }, 10);
 }
 
-// ======== Начать редактирование сообщения ========
 function startEditingMessage(messageId) {
   const messageWrapper = document.querySelector(`.messageWrapper[data-message-id="${messageId}"]`);
   if (!messageWrapper) return;
@@ -1246,7 +1215,6 @@ function startEditingMessage(messageId) {
   messageInput.addEventListener('keydown', keyHandler);
 }
 
-// ======== Подтвердить удаление сообщения ========
 function confirmDeleteMessage(messageId) {
   showConfirmModal(
     "Удалить сообщение",
@@ -1263,7 +1231,6 @@ function confirmDeleteMessage(messageId) {
   );
 }
 
-// ======== Обновить текст сообщения ========
 function updateMessageText(messageId, newText, isEdited) {
   const messageWrapper = document.querySelector(`.messageWrapper[data-message-id="${messageId}"]`);
   if (!messageWrapper) return;
@@ -1286,7 +1253,6 @@ function updateMessageText(messageId, newText, isEdited) {
   }
 }
 
-// ======== Обновить цитаты ответов после редактирования исходного сообщения ========
 function updateReplyBlocksAfterEdit(editedMessageId) {
   const replyBlocks = document.querySelectorAll(`.messageReply[data-reply-to="${editedMessageId}"]`);
   const sourceMessage = document.querySelector(`.messageWrapper[data-message-id="${editedMessageId}"]`);
@@ -1412,7 +1378,6 @@ function updateReplyBlocksAfterEdit(editedMessageId) {
   }
 }
 
-// ======== Удалить сообщение ========
 function removeMessage(messageId) {
   const messageWrapper = document.querySelector(`.messageWrapper[data-message-id="${messageId}"]`);
   if (messageWrapper) {
@@ -1449,13 +1414,11 @@ function removeMessage(messageId) {
     });
 }
 
-// ======== Форматировать время ========
 function formatTime(timestamp) {
   const date = new Date(timestamp);
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-// ======== Добавить пользователя в список ========
 function addUserToList(user, isNewUser = true) {
   const usersList = document.querySelector('.usersList');
   
@@ -1543,7 +1506,6 @@ function addUserToList(user, isNewUser = true) {
   }
 }
 
-// ======== Удалить пользователя из списка ========
 function removeUser(userId) {
   const userElement = document.getElementById(`user-${userId}`);
   if (userElement) {
@@ -1551,7 +1513,6 @@ function removeUser(userId) {
   }
 }
 
-// ======== Прикрепить файл ========
 function attachFile() {
   if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
     showConfirmModal('Ошибка', 'Ваш браузер не поддерживает загрузку файлов.', false);
@@ -1616,7 +1577,6 @@ function attachFile() {
   }
 }
 
-// ======== Обработка вставки из буфера обмена ========
 function handlePaste(e) {
   const items = (e.clipboardData || e.originalEvent.clipboardData).items;
   
@@ -1643,7 +1603,6 @@ function handlePaste(e) {
   }
 }
 
-// ======== Получить иконку файла ========
 function getFileIcon(mimeType) {
   if (mimeType.startsWith('image/')) return '🖼️';
   if (mimeType.startsWith('video/')) return '🎥';
@@ -1656,7 +1615,6 @@ function getFileIcon(mimeType) {
   return '📎';
 }
 
-// ======== Форматировать размер файла ========
 function formatFileSize(bytes) {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
@@ -1665,7 +1623,6 @@ function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// ======== Скачать файл ========
 function downloadFile(file) {
   let url;
   
@@ -1695,7 +1652,6 @@ function downloadFile(file) {
   }
 }
 
-// ======== Скачать файл с сервера ========
 function downloadFileFromServer(file) {
   const downloadUrl = `/download/${file.name}`;
   
@@ -1709,7 +1665,6 @@ function downloadFileFromServer(file) {
   document.body.removeChild(a);
 }
 
-// ======== Показать предварительный просмотр изображения ========
 function showImagePreview(file) {
   
   const modal = document.createElement('div');
@@ -1791,7 +1746,6 @@ function showImagePreview(file) {
   document.body.appendChild(modal);
 }
 
-// ======== Показать предварительный просмотр видео ========
 function showVideoPreview(file) {
   
   const modal = document.createElement('div');
@@ -1865,8 +1819,7 @@ function showVideoPreview(file) {
   modal.appendChild(video);
   document.body.appendChild(modal);
 }
-
-// ======== Обновить предварительный просмотр файлов ========
+  
 function updateFilePreview() {
   const oldPreview = document.querySelector('.file-preview');
   if (oldPreview) {
@@ -1919,7 +1872,6 @@ function updateFilePreview() {
   ensureFilePreviewOrder();
 }
 
-// ======== Отправить сообщение ========
 function sendMessage() {
   if (!socket) {
     return;
@@ -2333,7 +2285,6 @@ function sendMessage() {
   }
 }
 
-// ======== Обработать печатание ========
 function handleTyping() {
   if (!socket) return;
   
@@ -2360,7 +2311,6 @@ function handleTyping() {
   }, 2000);
 }
 
-// ======== Инициализировать чат ========
 function initChat(userData) {
   try {
     if (!userData || !userData.user) {
@@ -2444,7 +2394,6 @@ function initChat(userData) {
         }
         if (save && newName && newName !== originalName) {
           updateDisplayName(newName);
-          // Сохраняем в localStorage
           localStorage.setItem('savedDisplayName', newName);
           if (window.playSound) {
             window.playSound('swift');
@@ -2547,7 +2496,6 @@ function initChat(userData) {
         }
         if (save && newName && newName !== originalName) {
           updateDisplayName(newName);
-          // Сохраняем в localStorage
           localStorage.setItem('savedDisplayName', newName);
           if (window.playSound) {
             window.playSound('swift');
@@ -2674,7 +2622,6 @@ function initChat(userData) {
       }
     });
     
-    // ======== Обработчики для кнопки смайлика ========
     const emojiButton = document.getElementById('emoji-button');
     
     emojiButton.addEventListener('click', (e) => {
@@ -2705,7 +2652,6 @@ function initChat(userData) {
       }
     });
     
-    // ======== Обработчики для модали GIF ========
     const closeGifModalButton = document.getElementById('close-gif-modal');
     const gifModalSearchInput = document.getElementById('gif-modal-search-input');
     const gifModalSearchButton = document.getElementById('gif-modal-search-button');
@@ -2857,7 +2803,6 @@ function initChat(userData) {
   }
 }
 
-// ======== Настроить события чата ========
 function setupChatEvents() {
   
   const currentUserAvatar = document.getElementById('current-user-avatar');
@@ -3002,7 +2947,6 @@ function setupChatEvents() {
   }
 }
 
-// ======== Обновить индикатор печатания ========
 function updateTypingIndicator() {
   const typingIndicator = document.getElementById('typing-indicator');
   const replyIndicator = document.querySelector('.replyIndicator');
@@ -3065,7 +3009,6 @@ function updateTypingIndicator() {
   }
   updateReplyIndicatorMargin();
 }
-// ======== Проверить права пользователя ========
 async function checkUserRights(username, tunnelUrl) {
   try {
     const adminResponse = await fetch(`${tunnelUrl}/check_auth`, {
@@ -3115,7 +3058,6 @@ async function checkUserRights(username, tunnelUrl) {
   }
 }
 
-// ======== Завершить вход ========
 function completeLogin(username, serverUrl, isAdmin = false, isModerator = false, password = '') {
   let formattedUrl = serverUrl.trim();
   
@@ -3157,7 +3099,6 @@ function completeLogin(username, serverUrl, isAdmin = false, isModerator = false
   }
 }
 
-// ======== Присоединиться к чату ========
 function joinChat(socket, username, userId, isAdmin = false, isModerator = false, password = '') {
   if (!socket || socket.readyState !== WebSocket.OPEN) {
     return;
@@ -3197,7 +3138,6 @@ function joinChat(socket, username, userId, isAdmin = false, isModerator = false
   }, 5000);
 }
 
-// ======== Инициализировать сокет ========
 function initializeSocket(serverUrl, isTemp = false) {
   try {
     if (!serverUrl || serverUrl.trim() === '') {
@@ -3304,7 +3244,6 @@ function initializeSocket(serverUrl, isTemp = false) {
   }
 }
 
-// ======== Обработать сообщение WebSocket ========
 function handleWebSocketMessage(data) {
   const event = data.event;
   
@@ -3321,7 +3260,6 @@ function handleWebSocketMessage(data) {
       break;
     case 'message':
       handleNewMessage(data.message);
-      // Закрыть модалку прогресса после подтверждения отправки нашего сообщения
       try {
         const msg = data.message || {};
         if (msg.user && msg.user.id === currentUser.id && typeof msg.clientMessageId !== 'undefined') {
@@ -3377,7 +3315,6 @@ function handleWebSocketMessage(data) {
   }
 }
 
-// ======== Обработать приветствие ========
 function handleWelcome(data) {
   currentPage = 0;
   hasMoreMessages = data.hasMoreMessages || false;
@@ -3390,7 +3327,6 @@ function handleWelcome(data) {
   
 }
 
-// ======== Обработать присоединение пользователя ========
 function handleUserJoined(user) {
   addUserToList(user);
   createUserActivityToast(user, 'joined');
@@ -3427,7 +3363,6 @@ function handleUserJoined(user) {
   }
 }
 
-// ======== Обработать выход пользователя ========
 function handleUserLeft(user) {
   removeUser(user.id);  
   createUserActivityToast(user, 'left');
@@ -3437,7 +3372,6 @@ function handleUserLeft(user) {
   }
 }
 
-// ======== Обработать новое сообщение ========
 function handleNewMessage(message) {
   const isMyMessage = message.user.id === currentUser.id;
   const messageElement = createMessageElement(message, isMyMessage);
@@ -3480,7 +3414,6 @@ function handleNewMessage(message) {
   }
 }
 
-// ======== Обработать редактирование сообщения ========
 function handleMessageEdited(message) {
   updateMessageText(message.id, message.text, true);
   try {
@@ -3488,12 +3421,10 @@ function handleMessageEdited(message) {
   } catch (e) {}
 }
 
-// ======== Обработать удаление сообщения ========
 function handleMessageDeleted(messageId) {
   removeMessage(messageId);
 }
 
-// ======== Обработать печатание пользователя ========
 function handleUserTyping(user) {
   if (user.id !== currentUser.id) {
     typingUsers.add(user.id);
@@ -3501,13 +3432,11 @@ function handleUserTyping(user) {
   }
 }
 
-// ======== Обработать остановку печатания пользователя ========
 function handleUserStoppedTyping(user) {
   typingUsers.delete(user.id);
   updateTypingIndicator();
 }
 
-// ======== Обработать загрузку сообщений ========
 function handleMessagesLoaded(data) {
   isLoadingMessages = false;
   hasMoreMessages = data.hasMore;
@@ -3540,7 +3469,6 @@ function handleMessagesLoaded(data) {
   }
 }
 
-// ======== Запросить данные изображений для списка сообщений ========
 function requestImagesForMessages(messages) {
   if (!socket || !Array.isArray(messages) || messages.length === 0) return;
   const requests = [];
@@ -3562,7 +3490,6 @@ function requestImagesForMessages(messages) {
   }
 }
 
-// ======== Обработать подгрузку данных изображений ========
 function handleImageDataLoaded(images) {
   if (!Array.isArray(images) || images.length === 0) return;
   for (const item of images) {
@@ -3679,7 +3606,6 @@ function handleImageDataLoaded(images) {
   }
 }
 
-// ======== Обновить превью изображений в плашках ответов ========
 function updateReplyPreviews(messageId, imageData) {
   const replyBlocks = document.querySelectorAll(`.messageReply[data-reply-to="${messageId}"]`);
   replyBlocks.forEach(replyBlock => {
@@ -3713,7 +3639,6 @@ function updateReplyPreviews(messageId, imageData) {
   });
 }
 
-// ======== Обработать изменение аватара ========
 function handleAvatarChanged(data) {
   const userElement = document.querySelector(`#user-${data.userId}`);
   if (userElement) {
@@ -3759,7 +3684,6 @@ function handleAvatarChanged(data) {
   }
 }
 
-// ======== Обработать изменение отображаемого имени ========
 function handleDisplayNameChanged(data) {
   const { username, oldDisplayName, newDisplayName, userId } = data;
   
@@ -3835,7 +3759,6 @@ function handleDisplayNameChanged(data) {
   });
 }
 
-// ======== Обработать обновление названия группы ========
 function handleGroupNameUpdated(name) {
   updateGroupName(name);
   createNotificationToast(`Название группы изменено на "${name}"`);
@@ -3844,7 +3767,6 @@ function handleGroupNameUpdated(name) {
   }
 }
 
-// ======== Обработать категории аватаров ========
 function handleAvatarCategories(data) {
   const categories = data.categories || {};
   const unlockedSpecialAvatars = data.unlockedSpecialAvatars || [];
@@ -3871,17 +3793,14 @@ function handleAvatarCategories(data) {
   }
 }
 
-// ======== Обработать занятое имя пользователя ========
 function handleUsernameTaken(message) {
   showConfirmModal("Ошибка", message, false);
 }
 
-// ======== Обработать ошибку аутентификации ========
 function handleAuthFailed(message) {
   showConfirmModal("Ошибка аутентификации", message, false);
 }
 
-// ======== Обновить отображаемое имя пользователя ========
 function updateDisplayName(newName) {
   if (!socket || !currentUser.username) {
     return;
@@ -3894,7 +3813,6 @@ function updateDisplayName(newName) {
   
 }
 
-// ======== Обновить название группы ========
 function updateGroupName(name) {
   const groupNameElement = document.getElementById('group-name');
   if (groupNameElement) {
@@ -3902,7 +3820,6 @@ function updateGroupName(name) {
   }
 }
 
-// ======== Загрузить больше сообщений ========
 function loadMoreMessages() {
   if (isLoadingMessages || !hasMoreMessages || !socket) {
     return;
@@ -3938,7 +3855,6 @@ function loadMoreMessages() {
   window.lastScrollHeight = scrollHeight;
 }
 
-// ======== Проверить статус сети ========
 function checkNetworkStatus() {
   return navigator.onLine;
 }
@@ -4000,7 +3916,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// ======== Обновить аватар пользователя ========
 function updateUserAvatar(newAvatarSrc) {
   if (!socket || !currentUser.username) {
     return;
@@ -4015,7 +3930,6 @@ function updateUserAvatar(newAvatarSrc) {
   }));
 }
 
-// ======== Получить страницы пагинации ========
 function getPaginationPages(current, total) {
   const delta = 1;
   const range = [];
@@ -4040,7 +3954,6 @@ function getPaginationPages(current, total) {
   return rangeWithDots;
 }
 
-// ======== Отобразить аватары ========
 function renderAvatars(avatars, avatarContainer, currentPage, currentAvatars, pagination, modal, buttonsContainer) {
   currentAvatars = avatars;
   avatarContainer.innerHTML = '';
@@ -4159,7 +4072,6 @@ function renderAvatars(avatars, avatarContainer, currentPage, currentAvatars, pa
   });
 }
 
-// ======== Показать селектор аватара ========
 function showAvatarSelector() {
   
   const modal = document.createElement('div');
@@ -4275,7 +4187,6 @@ function showAvatarSelector() {
   document.body.appendChild(modal);
 }
 
-// ======== Начать ответ на сообщение ========
 function startReplyToMessage(messageId) {
   const messageWrapper = document.querySelector(`.messageWrapper[data-message-id="${messageId}"]`);
   if (!messageWrapper) return;
@@ -4347,7 +4258,6 @@ function startReplyToMessage(messageId) {
   document.addEventListener('keydown', cancelReplyHandler);
 }
 
-// ======== Показать индикатор ответа ========
 function showReplyIndicator(messageId, replyText, replyUsername, replyFiles = []) {
   hideReplyIndicator();
   let replyIndicator = document.createElement('div');
@@ -4409,13 +4319,11 @@ function showReplyIndicator(messageId, replyText, replyUsername, replyFiles = []
   ensureFilePreviewOrder();
 }
 
-// ======== Скрыть индикатор ответа ========
 function hideReplyIndicator() {
   const existingIndicator = document.querySelector('.replyIndicator');
   if (existingIndicator) existingIndicator.remove();
 }
 
-// ======== Обновить отступ индикатора ответа ========
 function updateReplyIndicatorMargin() {
   const replyIndicator = document.querySelector('.replyIndicator');
   const typingIndicator = document.getElementById('typing-indicator');
@@ -4428,7 +4336,6 @@ function updateReplyIndicatorMargin() {
   }
 }
 
-// ======== Отменить ответ ========
 function cancelReply() {
   replyingToMessageId = null;
   hideReplyIndicator();
@@ -4437,7 +4344,6 @@ function cancelReply() {
   messageInput.placeholder = 'Введите сообщение...';
 }
 
-// ======== Прокрутить к сообщению ========
 function scrollToMessage(messageId) {
   const messageElement = document.querySelector(`.messageWrapper[data-message-id="${messageId}"]`);
   if (messageElement) {
@@ -4463,7 +4369,6 @@ function scrollToMessage(messageId) {
   }
 }
 
-// ======== Обеспечить правильный порядок элементов ========
 function ensureFilePreviewOrder() {
   const filePreview = document.querySelector('.file-preview');
   const replyIndicator = document.querySelector('.replyIndicator');
@@ -4476,7 +4381,6 @@ function ensureFilePreviewOrder() {
   }
 }
 
-// ======== Экспорт функций бейджиков для глобального использования ========
 window.addAdminBadge = addAdminBadge;
 window.addModeratorBadge = addModeratorBadge;
 window.addPremiumBadge = addPremiumBadge;

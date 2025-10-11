@@ -1,9 +1,6 @@
-// ======== Система карточек ========
-
 let cardOverlay = null;
 let cardContainer = null;
 
-// ======== Инициализация системы карточек ========
 function initCardSystem() {
   if (!cardOverlay) {
     cardOverlay = document.createElement('div');
@@ -23,7 +20,6 @@ function initCardSystem() {
   document.addEventListener('keydown', handleCardKeydown);
 }
 
-// ======== Показать карточку ========
 function showCard(cardData) {
   if (!cardContainer) {
     initCardSystem();
@@ -47,7 +43,6 @@ function showCard(cardData) {
   }, 250); 
 }
 
-// ======== Создать карточку ========
 function createCard(cardData) {
   const card = document.createElement('div');
   card.className = 'card';
@@ -113,7 +108,6 @@ function createCard(cardData) {
 }
 
 
-// ======== Закрыть все карточки ========
 function closeAllCards() {
   if (cardOverlay) {
     cardOverlay.style.display = 'none';
@@ -136,7 +130,6 @@ function closeAllCards() {
   }
 }
 
-// ======== Закрыть конкретную карточку ========
 function closeCard(cardId) {
   const card = document.getElementById(cardId);
   if (card) {
@@ -155,14 +148,12 @@ function closeCard(cardId) {
   }
 }
 
-// ======== Обработка клавиш ========
 function handleCardKeydown(e) {
   if (e.key === 'Escape') {
     closeAllCards();
   }
 }
 
-// ======== Создать дефолтную карточку ========
 function createDefaultCard() {
   const cardData = {
     id: 'default-card',
@@ -180,7 +171,6 @@ function createDefaultCard() {
   return showCard(cardData);
 }
 
-// ======== Создать информационную карточку ========
 function createInfoCard(title, subtitle, content = null) {
   const cardData = {
     title: title,
@@ -198,7 +188,6 @@ function createInfoCard(title, subtitle, content = null) {
   return showCard(cardData);
 }
 
-// ======== Создать карточку подтверждения ========
 function createConfirmCard(title, subtitle, onConfirm, onCancel = null) {
   const cardData = {
     title: title,
@@ -226,7 +215,6 @@ function createConfirmCard(title, subtitle, onConfirm, onCancel = null) {
   return showCard(cardData);
 }
 
-// ======== Добавить бейджик к элементу в карточке ========
 function addBadgeToCardElement(elementId, badgeType) {
   setTimeout(() => {
     const element = document.getElementById(elementId);
@@ -236,9 +224,6 @@ function addBadgeToCardElement(elementId, badgeType) {
   }, 350); 
 }
 
-
-
-// ======== Инициализация при загрузке DOM ========
 document.addEventListener('DOMContentLoaded', () => {
   initCardSystem();
   
@@ -250,7 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ======== Экспорт функций для глобального использования ========
 window.showCard = showCard;
 window.closeAllCards = closeAllCards;
 window.closeCard = closeCard;

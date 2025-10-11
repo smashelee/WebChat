@@ -1,5 +1,3 @@
-/* ======== ОДНОЦВЕТНЫЕ ТЕМЫ ======== */
-
 [data-theme='ruby-fire'] {
   --primary-color: #dc2626;
   --accent-color-rgb: 239, 68, 68;
@@ -143,8 +141,6 @@
   --gradient-bg: linear-gradient(135deg, #1a0f1f, #2d1b35);
   --button-gradient: linear-gradient(135deg, var(--primary-color), var(--dark-accent));
 }
-
-/* ======== МНОГОЦВЕТНЫЕ ТЕМЫ ======== */
 
 [data-theme='aurora-borealis'] {
   --primary-color: #06b6d4;

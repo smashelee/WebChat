@@ -6,7 +6,6 @@ let sounds = {};
 let isPageVisible = true;
 let bgParticlesEnabled = true;
 
-// ======== Показать кастомную подсказку ========
 function showCustomTooltip(e, text) {
   if (!customTooltip) {
     customTooltip = document.createElement('div');
@@ -23,14 +22,12 @@ function showCustomTooltip(e, text) {
   customTooltip.classList.add('visible');
 }
 
-// ======== Скрыть кастомную подсказку ========
 function hideCustomTooltip() {
   if (customTooltip) {
     customTooltip.classList.remove('visible');
   }
 }
 
-// ======== Закрыть все модальные окна ========
 function closeAllModals() {
   const overlay = document.getElementById('modal-overlay');
   overlay.style.display = 'none';
@@ -50,7 +47,6 @@ function closeAllModals() {
   }
 }
 
-// ======== Показать модальное окно подтверждения ========
 function showConfirmModal(title, message, showCancel = true, confirmCallback = null, keepOtherModals = false) {
   if (!keepOtherModals) {
     closeAllModals();
@@ -115,7 +111,6 @@ function showConfirmModal(title, message, showCancel = true, confirmCallback = n
   }, 0);
 }
 
-// ======== Показать модалку с прогресс-баром (без кнопок) ========
 function showProgressConfirmModal(title = 'Отправка', message = 'Подготовка файлов...') {
   closeAllModals();
   setTimeout(() => {
@@ -172,7 +167,6 @@ function showProgressConfirmModal(title = 'Отправка', message = 'Под�
   }, 0);
 }
 
-// ======== Обновить прогресс в модалке ========
 function updateProgressConfirmModal(percent = 0, text = '') {
   const bar = document.getElementById('confirm-progress-bar');
   const label = document.getElementById('confirm-progress-label');
@@ -181,7 +175,6 @@ function updateProgressConfirmModal(percent = 0, text = '') {
   if (label) label.textContent = text ? text : safe + '%';
 }
 
-// ======== Закрыть модалку прогресса ========
 function closeProgressConfirmModal() {
   const modal = document.getElementById('confirm-action-modal');
   const overlay = document.getElementById('modal-overlay');
@@ -197,7 +190,6 @@ window.showProgressConfirmModal = showProgressConfirmModal;
 window.updateProgressConfirmModal = updateProgressConfirmModal;
 window.closeProgressConfirmModal = closeProgressConfirmModal;
 
-// ======== Показать модальное окно прикрепления файлов ========
 function showAttachModal(title = "Прикрепить файл", message = "Выберите действие для прикрепления файлов", showCancel = true, confirmCallback = null, keepOtherModals = false) {
   if (!keepOtherModals) {
     closeAllModals();
@@ -264,7 +256,6 @@ function showAttachModal(title = "Прикрепить файл", message = "В�
   }, 0);
 }
 
-// ======== Показать модальное окно подтверждения администратора ========
 function showAdminConfirmModal(confirmCallback) {
   closeAllModals();
   const confirmModal = document.getElementById('confirm-action-modal');
@@ -329,7 +320,6 @@ function showAdminConfirmModal(confirmCallback) {
   }, 0);
 }
 
-// ======== Показать модальное окно подтверждения модератора ========
 function showModeratorConfirmModal(confirmCallback) {
   closeAllModals();
   const confirmModal = document.getElementById('confirm-action-modal');
@@ -394,7 +384,6 @@ function showModeratorConfirmModal(confirmCallback) {
   }, 0);
 }
 
-// ======== Создать уведомление-тост ========
 function createNotificationToast(message) {
   if (document.getElementById('login-form') && document.getElementById('login-form').style.display !== 'none') {
     return;
@@ -473,7 +462,6 @@ function createNotificationToast(message) {
   return toast;
 }
 
-// ======== Создать тост активности пользователя ========
 function createUserActivityToast(user, action) {
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -536,7 +524,6 @@ function createUserActivityToast(user, action) {
     }, 3000);
 }
 
-// ======== Переключение категорий тем ========
 let themeSwitcherInitialized = false;
 
 function initThemeSwitcher() {
@@ -739,7 +726,6 @@ function initThemeSwitcher() {
   setupBackgroundParticlesSwitch();
 }
 
-// ======== Переключатель фоновых частиц (чекбокс) ========
 function setupBackgroundParticlesSwitch() {
   const checkbox = document.getElementById('uv-checkbox');
   if (!checkbox) return;
@@ -849,7 +835,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 }); 
 
-// ======== Инициализация звуков ========
 function initSounds() {
   try {
     sounds.elegant = new Audio('public/sounds/elegant.ogg');
@@ -868,7 +853,6 @@ function initSounds() {
   }
 }
 
-// ======== Универсальная функция проигрывания звука ========
 function playSound(soundName) {
   const sound = sounds[soundName];
   if (!sound) {
@@ -886,12 +870,10 @@ function playSound(soundName) {
   }
 }
 
-// ======== Проверить видимость страницы ========
 function checkPageVisibility() {
   isPageVisible = !document.hidden;
 }
 
-// ======== Показать уведомление о новом сообщении ========
 function showNewMessageNotification(message, username) {
   if (document.hidden) {
     if ('Notification' in window && Notification.permission === 'granted') {
@@ -916,7 +898,6 @@ function showNewMessageNotification(message, username) {
   }
 }
 
-// ======== Запросить разрешение на уведомления ========
 function requestNotificationPermission() {
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission().then(permission => {
@@ -929,7 +910,6 @@ function requestNotificationPermission() {
   }
 }
 
-// ======== Инициализация системы уведомлений ========
 function initNotificationSystem() {
   initSounds();
   
@@ -942,7 +922,6 @@ function initNotificationSystem() {
   }
 }
 
-// ======== Экспорт функций для использования в других файлах ========
 window.playSound = playSound;
 window.showNewMessageNotification = showNewMessageNotification;
 window.initNotificationSystem = initNotificationSystem;
