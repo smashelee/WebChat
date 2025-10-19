@@ -1,6 +1,5 @@
 function isMobileDevice() {
   const isMobile = window.innerWidth <= 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  console.log('isMobileDevice:', isMobile, 'width:', window.innerWidth, 'userAgent:', navigator.userAgent);
   return isMobile;
 }
 
@@ -246,7 +245,7 @@ function setupKeyboardHandling() {
   const messageInput = document.getElementById('message-input');
 
   messageInput.addEventListener('blur', () => {
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       if (document.activeElement !== messageInput) {
         const messagesContainer = document.querySelector('.messagesContainer');
         if (messagesContainer) {
@@ -262,7 +261,7 @@ function setupKeyboardHandling() {
         
         resetLayout();
       }
-    }, 100);
+    });
   });
 
   messageInput.addEventListener('focus', () => {
@@ -273,10 +272,19 @@ function setupKeyboardHandling() {
         messagesContainer.classList.add('input-focused');
         document.body.classList.add('input-focused');
         
-        messagesContainer.scrollTo({
-          top: messagesContainer.scrollHeight,
-          behavior: 'smooth'
+        requestAnimationFrame(() => {
+          messagesContainer.scrollTo({
+            top: messagesContainer.scrollHeight,
+            behavior: 'instant'
+          });
         });
+        
+        setTimeout(() => {
+          messagesContainer.scrollTo({
+            top: messagesContainer.scrollHeight,
+            behavior: 'smooth'
+          });
+        }, 300);
       }
       
       const preventPageScroll = (e) => {
@@ -298,12 +306,12 @@ function setupKeyboardHandling() {
     if (isMobileDevice()) {
       const messagesContainer = document.querySelector('.messagesContainer');
       if (messagesContainer) {
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           messagesContainer.scrollTo({
             top: messagesContainer.scrollHeight,
-            behavior: 'smooth'
+            behavior: 'instant'
           });
-        }, 200);
+        });
       }
     }
   });
@@ -334,17 +342,21 @@ function adjustLayoutForKeyboard(event) {
   console.log('Keyboard height:', keyboardHeight);
 
   if (layoutAdjustmentTimeout) {
-    clearTimeout(layoutAdjustmentTimeout);
+    cancelAnimationFrame(layoutAdjustmentTimeout);
   }
 
-  layoutAdjustmentTimeout = setTimeout(() => {
+  layoutAdjustmentTimeout = requestAnimationFrame(() => {
     if (Math.abs(keyboardHeight) > 50 && !isLayoutAdjusted) {
       isLayoutAdjusted = true;
+      
+    document.body.classList.add('keyboard-open');
+    document.documentElement.classList.add('keyboard-open');
     inputArea.classList.add('mobile-fixed');
     chatArea.classList.add('keyboard-open');
     
-    document.body.classList.add('keyboard-open');
-    document.documentElement.classList.add('keyboard-open');
+    const headerHeight = document.querySelector('.chatHeader')?.offsetHeight || 60;
+    const inputHeight = inputArea.offsetHeight;
+    const availableHeight = Math.max(100, viewport.height - headerHeight - inputHeight);
     
     inputArea.style.position = 'fixed';
     inputArea.style.bottom = '0px';
@@ -353,10 +365,6 @@ function adjustLayoutForKeyboard(event) {
     inputArea.style.zIndex = '1000';
     inputArea.style.backgroundColor = 'var(--card-background)';
     inputArea.style.borderTop = '1px solid var(--border-color)';
-    
-    const headerHeight = document.querySelector('.chatHeader')?.offsetHeight || 60;
-    const inputHeight = inputArea.offsetHeight;
-    const availableHeight = Math.max(100, viewport.height - headerHeight - inputHeight);
     
     chatContainer.style.height = `${viewport.height}px`;
     chatArea.style.height = `${viewport.height}px`;
@@ -376,10 +384,11 @@ function adjustLayoutForKeyboard(event) {
       messagesContainer.style.height = `${availableHeight}px`;
       messagesContainer.style.maxHeight = `${availableHeight}px`;
       
-      setTimeout(() => {
-      messagesContainer.scrollTo({
-        top: messagesContainer.scrollHeight,
-        behavior: 'smooth'
+      requestAnimationFrame(() => {
+        messagesContainer.scrollTo({
+          top: messagesContainer.scrollHeight,
+          behavior: 'instant'
+        });
       });
       
       setTimeout(() => {
@@ -388,18 +397,7 @@ function adjustLayoutForKeyboard(event) {
           behavior: 'smooth'
         });
       }, 500);
-      
-      setTimeout(() => {
-        messagesContainer.style.overflowY = 'hidden';
-        messagesContainer.style.touchAction = 'none';
-        messagesContainer.style.pointerEvents = 'none';
-      }, 300);
-    }, 150);
     }
-    
-    setTimeout(() => {
-      inputArea.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }, 200);
     
     enableNoScroll();
 
@@ -412,7 +410,7 @@ function adjustLayoutForKeyboard(event) {
     isLayoutAdjusted = false;
     resetLayout();
   }
-  }, 100);
+  });
 }
 
 function resetLayout() {
@@ -535,10 +533,15 @@ document.addEventListener('DOMContentLoaded', function() {
   
   window.addEventListener('resize', handleResize);
   
+  let resizeTimeout = null;
   window.addEventListener('resize', () => {
+    const messageInput = document.getElementById('message-input');
     if (isMobileDevice() && document.activeElement === messageInput) {
       console.log('Resize event detected');
-      setTimeout(() => {
+      if (resizeTimeout) {
+        cancelAnimationFrame(resizeTimeout);
+      }
+      resizeTimeout = requestAnimationFrame(() => {
         const currentHeight = window.innerHeight;
         const keyboardHeight = window.screen.height - currentHeight;
         console.log('Resize event - keyboard height:', keyboardHeight);
@@ -547,7 +550,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           resetLayout();
         }
-      }, 100);
+      });
     }
   });
 });

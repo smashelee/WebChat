@@ -7,6 +7,7 @@ let attachedFiles = [];
 const ALLOWED_FILE_TYPES = [
   'image/png', 'image/jpeg', 'image/jpg', 'image/gif', 
   'image/webp', 'image/bmp', 'image/tiff', 'video/mp4',
+  'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg',
   'application/zip', 'application/x-zip-compressed', 'application/x-rar-compressed', 'application/x-7z-compressed'
 ];
 const MAX_FILE_SIZE = 25 * 1024 * 1024; 
@@ -183,7 +184,29 @@ function displayGifResultsModal(gifs) {
   loadingElement.style.display = 'none';
   noResultsElement.style.display = 'none';
 
-  gifs.forEach(gif => {
+  const isMobile = window.innerWidth <= 768;
+  const viewportHeight = window.innerHeight;
+  const screenHeight = window.screen.height;
+  
+  const isKeyboardOpen = isMobile && (
+    viewportHeight <= 670 || 
+    viewportHeight < screenHeight * 0.6 || 
+    viewportHeight < 500 ||
+    (viewportHeight >= 690 && viewportHeight <= 700)
+  );
+  
+  let maxGifs = gifs.length;
+  if (isMobile) {
+    if (isKeyboardOpen) {
+      maxGifs = 6;
+    } else {
+      maxGifs = 20;
+    }
+  }
+  
+  const gifsToShow = gifs.slice(0, maxGifs);
+
+  gifsToShow.forEach(gif => {
     const gifItem = document.createElement('div');
     gifItem.className = 'gifModalItem';
 
@@ -372,36 +395,59 @@ function createMessageElement(message, isMyMessage, isNewMessage = true) {
     if (replyToFiles.length > 0 || hasFiles) {
       let firstFile = null;
       let fileType = 'image';
+      let isAudio = false;
       
       if (replyToFiles.length > 0) {
         firstFile = replyToFiles[0];
         fileType = firstFile.tagName.toLowerCase();
       } else if (hasFiles) {
         const replyFile = message.replyTo.files[0];
-        fileType = replyFile.type && replyFile.type.startsWith('video/') ? 'video' : 'image';
+        if (replyFile.type && replyFile.type.startsWith('audio/')) {
+          fileType = 'audio';
+          isAudio = true;
+        } else if (replyFile.type && replyFile.type.startsWith('video/')) {
+          fileType = 'video';
+        } else if (replyFile.type && (replyFile.type === 'application/zip' || replyFile.type === 'application/x-zip-compressed' || replyFile.type === 'application/x-rar-compressed' || replyFile.type === 'application/x-7z-compressed')) {
+          fileType = 'archive';
+          isAudio = true; 
+        }
       }
       
-      const mediaPreview = document.createElement(fileType === 'video' ? 'video' : 'img');
+      const mediaPreview = isAudio ? document.createElement('span') : document.createElement(fileType === 'video' ? 'video' : 'img');
       
-      if (replyToFiles.length > 0) {
-        mediaPreview.src = firstFile.src;
-      } else if (hasFiles) {
-        const replyFile = message.replyTo.files[0];
-        mediaPreview.src = `public/${replyFile.path || replyFile.name}`;
+      if (isAudio) {
+        mediaPreview.textContent = fileType === 'archive' ? '🗜️' : '🎵';
+        mediaPreview.style.cssText = `
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 16px;
+          margin-right: 6px;
+          flex-shrink: 0;
+        `;
+      } else {
+        if (replyToFiles.length > 0) {
+          mediaPreview.src = firstFile.src;
+        } else if (hasFiles) {
+          const replyFile = message.replyTo.files[0];
+          mediaPreview.src = `public/${replyFile.path || replyFile.name}`;
+        }
+        
+        mediaPreview.style.cssText = `
+          width: 24px;
+          height: 24px;
+          object-fit: cover;
+          border-radius: 3px;
+          margin-right: 6px;
+          flex-shrink: 0;
+        `;
+        
+        mediaPreview.addEventListener('error', function() {
+          this.style.display = 'none';
+        });
       }
-      
-      mediaPreview.style.cssText = `
-        width: 24px;
-        height: 24px;
-        object-fit: cover;
-        border-radius: 3px;
-        margin-right: 6px;
-        flex-shrink: 0;
-      `;
-      
-      mediaPreview.addEventListener('error', function() {
-        this.style.display = 'none';
-      });
       
       if (fileType === 'video') {
         const isMobile = window.innerWidth <= 768;
@@ -442,7 +488,11 @@ function createMessageElement(message, isMyMessage, isNewMessage = true) {
         }
         replyText.textContent = replyPreview;
       } else {
-        replyText.textContent = fileType === 'video' ? 'Видео' : 'Фото';
+        if (fileType === 'audio') {
+          replyText.textContent = 'Аудио';
+        } else {
+          replyText.textContent = fileType === 'video' ? 'Видео' : 'Фото';
+        }
         replyText.style.cssText = `
           font-style: italic;
           color: rgba(255, 255, 255, 0.7);
@@ -489,7 +539,8 @@ function createMessageElement(message, isMyMessage, isNewMessage = true) {
   
   if (message.files && message.files.length > 0) {
     const mediaFiles = message.files.filter(file => file.type.startsWith('image/') || file.type.startsWith('video/') || file.isGif);
-    const otherFiles = message.files.filter(file => !file.type.startsWith('image/') && !file.type.startsWith('video/') && !file.isGif);
+    const audioFiles = message.files.filter(file => file.type.startsWith('audio/'));
+    const otherFiles = message.files.filter(file => !file.type.startsWith('image/') && !file.type.startsWith('video/') && !file.type.startsWith('audio/') && !file.isGif);
     
     if (mediaFiles.length > 0) {
       const mediaContainer = document.createElement('div');
@@ -652,6 +703,13 @@ function createMessageElement(message, isMyMessage, isNewMessage = true) {
       });
       
       messageContent.appendChild(mediaContainer);
+    }
+    
+    if (audioFiles.length > 0) {
+      audioFiles.forEach((file, index) => {
+        const audioPlayer = createCustomAudioPlayer(file, message.id, message.files.indexOf(file));
+        messageContent.appendChild(audioPlayer);
+      });
     }
     
     if (otherFiles.length > 0) {
@@ -916,48 +974,78 @@ function showMessageMenu(messageId, x, y) {
   menu.innerHTML = menuHtml;
 
   const isMobile = window.innerWidth <= 768;
+  
+  menu.style.left = `${x}px`;
+  menu.style.top = `${y}px`;
+  
   if (isMobile) {
     menu.classList.add('mobile');
-    
-    const messageRect = messageWrapper.getBoundingClientRect();
-    const menuX = messageRect.left + (messageRect.width / 2);
-    const menuY = messageRect.bottom + 10;
-    
-    menu.style.left = `${menuX}px`;
-    menu.style.top = `${menuY}px`;
     menu.style.transform = 'translateX(-50%)';
-    
-    setTimeout(() => {
-      const menuRect = menu.getBoundingClientRect();
-      
-      if (menuRect.left < 10) {
-        menu.style.left = '10px';
-        menu.style.transform = 'translateX(0)';
-      } else if (menuRect.right > window.innerWidth - 10) {
-        menu.style.left = `${window.innerWidth - 10}px`;
-        menu.style.transform = 'translateX(-100%)';
-      }
-      
-      if (menuRect.bottom > window.innerHeight - 10) {
-        menu.style.top = `${messageRect.top - menuRect.height - 10}px`;
-      }
-    }, 0);
-  } else {
-    menu.style.left = `${x}px`;
-    menu.style.top = `${y}px`;
-    setTimeout(() => {
-      const menuRect = menu.getBoundingClientRect();
-      if (menuRect.right > window.innerWidth) {
-        menu.style.left = `${window.innerWidth - menuRect.width - 10}px`;
-      }
-      if (menuRect.bottom > window.innerHeight) {
-        menu.style.top = `${window.innerHeight - menuRect.height - 10}px`;
-      }
-    }, 0);
   }
 
   document.body.appendChild(menu);
   activeMessageMenu = { menu, messageId };
+  
+  requestAnimationFrame(() => {
+    const menuRect = menu.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const padding = 10;
+    
+    let left = x;
+    let top = y;
+    let transform = '';
+    
+    if (isMobile) {
+      const menuWidth = menuRect.width;
+      const menuHeight = menuRect.height;
+      
+      const rightEdge = left + menuWidth / 2;
+      const leftEdge = left - menuWidth / 2;
+      
+      if (rightEdge > viewportWidth - padding) {
+        left = viewportWidth - padding;
+        transform = 'translateX(-100%)';
+      } else if (leftEdge < padding) {
+        left = padding;
+        transform = 'translateX(0)';
+      } else {
+        transform = 'translateX(-50%)';
+      }
+      
+      const bottomEdge = top + menuHeight + padding;
+      
+      if (bottomEdge > viewportHeight - padding) {
+        top = top - menuHeight - padding;
+        if (top < padding) {
+          top = padding;
+        }
+      }
+    } else {
+      const menuWidth = menuRect.width;
+      const menuHeight = menuRect.height;
+      
+      if (left + menuWidth > viewportWidth - padding) {
+        left = viewportWidth - menuWidth - padding;
+      }
+      if (left < padding) {
+        left = padding;
+      }
+      
+      if (top + menuHeight > viewportHeight - padding) {
+        top = viewportHeight - menuHeight - padding;
+      }
+      if (top < padding) {
+        top = padding;
+      }
+    }
+    
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+    if (transform) {
+      menu.style.transform = transform;
+    }
+  });
 
   menu.addEventListener('click', function(e) {
     e.stopPropagation();
@@ -1043,45 +1131,88 @@ function showFileContextMenu(messageId, fileIndex, x, y) {
   menu.innerHTML = `<div class="menu-item download-file">Скачать</div>`;
   
   const isMobile = window.innerWidth <= 768;
+  
+  menu.style.left = `${x}px`;
+  menu.style.top = `${y}px`;
+  
   if (isMobile) {
     menu.classList.add('mobile');
-    
-    const fileRect = fileElement.getBoundingClientRect();
-    const menuX = fileRect.left + (fileRect.width / 2);
-    const menuY = fileRect.bottom + 10;
-    
-    menu.style.left = `${menuX}px`;
-    menu.style.top = `${menuY}px`;
     menu.style.transform = 'translateX(-50%)';
-    
-    setTimeout(() => {
-      const menuRect = menu.getBoundingClientRect();
-      
-      if (menuRect.left < 10) {
-        menu.style.left = '10px';
-        menu.style.transform = 'translateX(0)';
-      } else if (menuRect.right > window.innerWidth - 10) {
-        menu.style.left = `${window.innerWidth - 10}px`;
-        menu.style.transform = 'translateX(-100%)';
-      }
-      
-      if (menuRect.bottom > window.innerHeight - 10) {
-        menu.style.top = `${fileRect.top - menuRect.height - 10}px`;
-      }
-      
-      menu.style.opacity = '1';
-    }, 10);
   } else {
-    menu.style.left = `${x}px`;
-    menu.style.top = `${y}px`;
     menu.style.transform = 'translate(-50%, -100%)';
-    setTimeout(() => {
-      menu.style.opacity = '1';
-    }, 10);
   }
   
   document.body.appendChild(menu);
   activeMessageMenu = { menu: menu, messageId: messageId };
+  
+  requestAnimationFrame(() => {
+    const menuRect = menu.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const padding = 10;
+    
+    let left = x;
+    let top = y;
+    let transform = '';
+    
+    if (isMobile) {
+      const menuWidth = menuRect.width;
+      const menuHeight = menuRect.height;
+      
+      const rightEdge = left + menuWidth / 2;
+      const leftEdge = left - menuWidth / 2;
+      
+      if (rightEdge > viewportWidth - padding) {
+        left = viewportWidth - padding;
+        transform = 'translateX(-100%)';
+      } else if (leftEdge < padding) {
+        left = padding;
+        transform = 'translateX(0)';
+      } else {
+        transform = 'translateX(-50%)';
+      }
+
+      const bottomEdge = top + menuHeight + padding;
+      
+      if (bottomEdge > viewportHeight - padding) {
+        top = top - menuHeight - padding;
+        if (top < padding) {
+          top = padding;
+        }
+      }
+    } else {
+      const menuWidth = menuRect.width;
+      const menuHeight = menuRect.height;
+      
+      const rightEdge = left + menuWidth / 2;
+      const leftEdge = left - menuWidth / 2;
+      
+      if (rightEdge > viewportWidth - padding) {
+        left = viewportWidth - menuWidth / 2 - padding;
+      } else if (leftEdge < padding) {
+        left = menuWidth / 2 + padding;
+      }
+      
+      const topEdge = top - menuHeight;
+      
+      if (topEdge < padding) {
+        transform = 'translate(-50%, 10%)';
+        top = y;
+      } else {
+        transform = 'translate(-50%, -100%)';
+      }
+      
+      const bottomEdge = top + menuHeight + padding;
+      if (bottomEdge > viewportHeight - padding && topEdge >= padding) {
+        transform = 'translate(-50%, -100%)';
+        top = y;
+      }
+    }
+    
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+    menu.style.transform = transform;
+  });
   
   menu.addEventListener('click', function(e) {
     e.stopPropagation();
@@ -1606,6 +1737,7 @@ function handlePaste(e) {
 function getFileIcon(mimeType) {
   if (mimeType.startsWith('image/')) return '🖼️';
   if (mimeType.startsWith('video/')) return '🎥';
+  if (mimeType.startsWith('audio/')) return '🎵';
   if (mimeType.startsWith('text/')) return '📄';
   if (mimeType === 'application/pdf') return '📕';
   if (mimeType.includes('word')) return '📘';
@@ -1819,6 +1951,386 @@ function showVideoPreview(file) {
   modal.appendChild(video);
   document.body.appendChild(modal);
 }
+
+function showAudioPreview(file) {
+  const modal = document.createElement('div');
+  const isMobile = window.innerWidth <= 768;
+  
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(5px);
+    padding: ${isMobile ? '20px' : '40px'};
+  `;
+  
+  const audioContainer = document.createElement('div');
+  audioContainer.style.cssText = `
+    background: var(--card-background);
+    border-radius: ${isMobile ? '16px' : '24px'};
+    padding: ${isMobile ? '20px' : '30px'};
+    max-width: ${isMobile ? '90%' : '500px'};
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  `;
+  
+  const audioName = document.createElement('div');
+  audioName.textContent = file.name || 'Аудиофайл';
+  audioName.style.cssText = `
+    font-size: ${isMobile ? '16px' : '18px'};
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: ${isMobile ? '16px' : '20px'};
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  `;
+  
+  const audio = document.createElement('audio');
+  audio.controls = true;
+  audio.autoplay = false;
+  audio.style.cssText = `
+    width: 100%;
+    height: ${isMobile ? '50px' : '60px'};
+    border-radius: 12px;
+  `;
+  
+  try {
+    if (file.url) {
+      audio.src = file.url;
+    } else if (file.data) {
+      if (typeof file.data === 'string' && file.data.startsWith('data:')) {
+        audio.src = file.data;
+      } else if (typeof file.data === 'string') {
+        audio.src = `data:${file.type};base64,${file.data}`;
+      } else {
+        const blob = new Blob([file.data], { type: file.type });
+        audio.src = URL.createObjectURL(blob);
+      }
+    } else if (file instanceof File) {
+      audio.src = URL.createObjectURL(file);
+    } else {
+      return;
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки аудио:', error);
+    return;
+  }
+  
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      document.body.removeChild(modal);
+      URL.revokeObjectURL(audio.src);
+    }
+  });
+  
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      document.body.removeChild(modal);
+      URL.revokeObjectURL(audio.src);
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+  
+  audioContainer.appendChild(audioName);
+  audioContainer.appendChild(audio);
+  modal.appendChild(audioContainer);
+  document.body.appendChild(modal);
+}
+
+function createCustomAudioPlayer(file, messageId = null, fileIndex = null) {
+  const audioPlayer = document.createElement('div');
+  audioPlayer.className = 'audioPlayer';
+  
+  const audioName = document.createElement('span');
+  audioName.className = 'audioPlayerName';
+  audioName.textContent = file.name || 'Аудиофайл';
+  
+  audioName.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showAudioPreview(file);
+  });
+  
+  audioName.addEventListener('contextmenu', (e) => {
+    e.stopPropagation();
+  });
+  
+  audioPlayer.appendChild(audioName);
+  
+  const audioElement = document.createElement('audio');
+  audioElement.preload = 'metadata';
+  
+  if (!file.data && !file.url && !(file instanceof File) && messageId !== null && fileIndex !== null) {
+    return createAudioPlaceholderWithLoading(file.name, messageId, fileIndex);
+  }
+  
+  try {
+    if (file.url) {
+      audioElement.src = file.url;
+    } else if (file.data) {
+      if (typeof file.data === 'string' && file.data.startsWith('data:')) {
+        audioElement.src = file.data;
+      } else if (typeof file.data === 'string') {
+        audioElement.src = `data:${file.type};base64,${file.data}`;
+      } else if (file.data instanceof ArrayBuffer || file.data instanceof Uint8Array) {
+        const blob = new Blob([file.data], { type: file.type || 'audio/mpeg' });
+        audioElement.src = URL.createObjectURL(blob);
+      } else {
+        console.error('Неподдерживаемый формат данных аудио');
+        return createAudioPlaceholder(file.name, 'Неподдерживаемый формат');
+      }
+    } else if (file instanceof File) {
+      audioElement.src = URL.createObjectURL(file);
+    } else {
+      console.error('Нет данных для аудио файла');
+      return createAudioPlaceholder(file.name, 'Нет данных');
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки аудио:', error);
+    return createAudioPlaceholder(file.name, 'Ошибка загрузки');
+  }
+  
+  audioPlayer.appendChild(audioElement);
+  
+  const controls = document.createElement('div');
+  controls.className = 'audioPlayerControls';
+  
+  const playButton = document.createElement('button');
+  playButton.className = 'audioPlayButton';
+  playButton.innerHTML = `
+    <svg viewBox="0 0 24 24">
+      <path d="M8 5v14l11-7z"/>
+    </svg>
+  `;
+  
+  let isPlaying = false;
+  
+  const togglePlay = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    if (isPlaying) {
+      audioElement.pause();
+      playButton.innerHTML = `
+        <svg viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      `;
+      isPlaying = false;
+    } else {
+      audioElement.play().catch(err => {
+        console.error('Ошибка воспроизведения:', err);
+      });
+      playButton.innerHTML = `
+        <svg viewBox="0 0 24 24">
+          <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+        </svg>
+      `;
+      isPlaying = true;
+    }
+  };
+  
+  playButton.addEventListener('click', togglePlay, { passive: false });
+  playButton.addEventListener('touchend', togglePlay, { passive: false });
+  
+  const info = document.createElement('div');
+  info.className = 'audioPlayerInfo';
+  
+  const progressBar = document.createElement('div');
+  progressBar.className = 'audioProgressBar';
+  
+  const progressFill = document.createElement('div');
+  progressFill.className = 'audioProgressFill';
+  progressBar.appendChild(progressFill);
+  
+  const timeDisplay = document.createElement('div');
+  timeDisplay.className = 'audioPlayerTime';
+  timeDisplay.innerHTML = `
+    <span class="currentTime">0:00</span>
+    <span class="separator"> / </span>
+    <span class="duration">0:00</span>
+  `;
+  
+  info.appendChild(progressBar);
+  info.appendChild(timeDisplay);
+  
+  controls.appendChild(playButton);
+  controls.appendChild(info);
+  
+  controls.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+  
+  controls.addEventListener('touchstart', (e) => {
+    e.stopPropagation();
+  }, { passive: true });
+  
+  controls.addEventListener('contextmenu', (e) => {
+    e.stopPropagation();
+  });
+  
+  audioPlayer.appendChild(controls);
+  
+  function formatAudioTime(seconds) {
+    if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+ 
+  audioElement.addEventListener('loadedmetadata', () => {
+    const durationSpan = timeDisplay.querySelector('.duration');
+    if (durationSpan && audioElement.duration) {
+      durationSpan.textContent = formatAudioTime(audioElement.duration);
+    }
+  });
+  
+  audioElement.addEventListener('timeupdate', () => {
+    const currentSpan = timeDisplay.querySelector('.currentTime');
+    if (currentSpan) {
+      currentSpan.textContent = formatAudioTime(audioElement.currentTime);
+    }
+    
+    if (audioElement.duration && isFinite(audioElement.duration)) {
+      const progress = (audioElement.currentTime / audioElement.duration) * 100;
+      progressFill.style.width = `${progress}%`;
+    }
+  });
+  
+  audioElement.addEventListener('ended', () => {
+    isPlaying = false;
+    playButton.innerHTML = `
+      <svg viewBox="0 0 24 24">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+    `;
+    progressFill.style.width = '0%';
+    audioElement.currentTime = 0;
+  });
+  
+  audioElement.addEventListener('error', (e) => {
+    console.error('Ошибка воспроизведения аудио:', e);
+    playButton.disabled = true;
+    playButton.style.opacity = '0.5';
+  });
+  
+  progressBar.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!audioElement.duration || !isFinite(audioElement.duration)) return;
+    const rect = progressBar.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    const percent = clickX / width;
+    audioElement.currentTime = percent * audioElement.duration;
+  });
+  
+  return audioPlayer;
+}
+
+function createAudioPlaceholder(fileName, errorMessage = 'Не удалось загрузить') {
+  const placeholder = document.createElement('div');
+  placeholder.className = 'audioPlayer audioPlayer--disabled';
+  
+  const name = document.createElement('span');
+  name.className = 'audioPlayerName';
+  name.textContent = fileName || 'Аудиофайл';
+  placeholder.appendChild(name);
+  
+  const controls = document.createElement('div');
+  controls.className = 'audioPlayerControls';
+  
+  const icon = document.createElement('div');
+  icon.className = 'audioPlayButton';
+  icon.innerHTML = `
+    <svg viewBox="0 0 24 24">
+      <path d="M8 5v14l11-7z"/>
+    </svg>
+  `;
+  
+  const info = document.createElement('div');
+  info.className = 'audioPlayerInfo';
+  info.innerHTML = `
+    <div class="audioProgressBar">
+      <div class="audioProgressFill" style="width: 0%"></div>
+    </div>
+    <div class="audioPlayerTime">
+      <span>${errorMessage}</span>
+    </div>
+  `;
+  
+  controls.appendChild(icon);
+  controls.appendChild(info);
+  
+  placeholder.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+  
+  placeholder.addEventListener('contextmenu', (e) => {
+    e.stopPropagation();
+  });
+  
+  placeholder.appendChild(controls);
+  
+  return placeholder;
+}
+
+function createAudioPlaceholderWithLoading(fileName, messageId, fileIndex) {
+  const placeholder = document.createElement('div');
+  placeholder.className = 'audioPlayer audioPlayer--loading';
+  placeholder.dataset.messageId = messageId;
+  placeholder.dataset.fileIndex = fileIndex;
+  
+  const name = document.createElement('span');
+  name.className = 'audioPlayerName';
+  name.textContent = fileName || 'Аудиофайл';
+  placeholder.appendChild(name);
+  
+  const controls = document.createElement('div');
+  controls.className = 'audioPlayerControls';
+  
+  const icon = document.createElement('div');
+  icon.className = 'audioPlayButton';
+  icon.innerHTML = `
+    <svg viewBox="0 0 24 24">
+      <path d="M8 5v14l11-7z"/>
+    </svg>
+  `;
+  
+  const info = document.createElement('div');
+  info.className = 'audioPlayerInfo';
+  info.innerHTML = `
+    <div class="audioProgressBar">
+      <div class="audioProgressFill" style="width: 0%"></div>
+    </div>
+    <div class="audioPlayerTime">
+      <span>Загрузка...</span>
+    </div>
+  `;
+  
+  controls.appendChild(icon);
+  controls.appendChild(info);
+  
+  placeholder.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+  
+  placeholder.addEventListener('contextmenu', (e) => {
+    e.stopPropagation();
+  });
+  
+  placeholder.appendChild(controls);
+  
+  return placeholder;
+}
   
 function updateFilePreview() {
   const oldPreview = document.querySelector('.file-preview');
@@ -1900,7 +2412,7 @@ function sendMessage() {
              </div>
           </div>
           
-          <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+          <div style="background: rgba(var(--accent-color-rgb), 0.1); border: 1px solid rgba(var(--accent-color-rgb), 0.2); border-radius: 8px; padding: 12px; margin-bottom: 15px;">
             <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Роль в проекте:</div>
             <div style="font-size: 14px; color: var(--text-color);">• Тестирование функциональности чата</div>
             <div style="font-size: 14px; color: var(--text-color);">• Выявление багов и предложения улучшений и скрытых функций</div>
@@ -1946,7 +2458,7 @@ function sendMessage() {
              </div>
           </div>
           
-          <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+          <div style="background: rgba(var(--accent-color-rgb), 0.1); border: 1px solid rgba(var(--accent-color-rgb), 0.2); border-radius: 8px; padding: 12px; margin-bottom: 15px;">
             <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Роль в проекте:</div>
             <div style="font-size: 14px; color: var(--text-color);">• Тестирование функциональности чата</div>
             <div style="font-size: 14px; color: var(--text-color);">• Предложения улучшений</div>
@@ -1992,7 +2504,7 @@ function sendMessage() {
              </div>
           </div>
           
-          <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+          <div style="background: rgba(var(--accent-color-rgb), 0.1); border: 1px solid rgba(var(--accent-color-rgb), 0.2); border-radius: 8px; padding: 12px; margin-bottom: 15px;">
             <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Роль в проекте:</div>
             <div style="font-size: 14px; color: var(--text-color);">• Создание проекта</div>
             <div style="font-size: 14px; color: var(--text-color);">• Разработка всех функций проекта</div>
@@ -2037,7 +2549,7 @@ function sendMessage() {
              </div>
           </div>
           
-          <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+          <div style="background: rgba(var(--accent-color-rgb), 0.1); border: 1px solid rgba(var(--accent-color-rgb), 0.2); border-radius: 8px; padding: 12px; margin-bottom: 15px;">
             <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Роль в проекте:</div>
             <div style="font-size: 14px; color: var(--text-color);">• Создание всего интерфейса проекта</div>
             <div style="font-size: 14px; color: var(--text-color);">• Помощник в создании тем для проекта</div>
@@ -2197,7 +2709,10 @@ function sendMessage() {
           if (typeof updateProgressConfirmModal === 'function') {
             updateProgressConfirmModal((loadedFiles / totalFiles) * 100, `Подготовлено ${loadedFiles} из ${totalFiles}`);
           }
-        } else if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+          if (loadedFiles === totalFiles) {
+            sendMessageWithFiles();
+          }
+        } else if (file.type.startsWith('image/') || file.type.startsWith('video/') || file.type.startsWith('audio/')) {
           const reader = new FileReader();
           reader.onload = function(e) {
             fileData.data = e.target.result;
@@ -2226,13 +2741,16 @@ function sendMessage() {
           if (typeof updateProgressConfirmModal === 'function') {
             updateProgressConfirmModal((loadedFiles / totalFiles) * 100, `Подготовлено ${loadedFiles} из ${totalFiles}`);
           }
+          if (loadedFiles === totalFiles) {
+            sendMessageWithFiles();
+          }
         }
         
         filesData.push(fileData);
       }
       
       const hasMediaFiles = attachedFiles.some(file => 
-        file.type.startsWith('image/') || file.type.startsWith('video/') || file.isGif
+        file.type.startsWith('image/') || file.type.startsWith('video/') || file.type.startsWith('audio/') || file.isGif
       );
       
       if (!hasMediaFiles) {
@@ -2426,6 +2944,7 @@ function initChat(userData) {
     
     document.getElementById('login-form').style.display = 'none';
     document.getElementById('chat-container').style.display = 'flex';
+    document.body.classList.remove('registration-active');
 
     currentUser.id = userData.user.id;
     currentUser.username = userData.user.username;
@@ -2798,6 +3317,16 @@ function initChat(userData) {
     
     document.getElementById('current-user-avatar').addEventListener('click', showAvatarSelector);
     
+    setTimeout(() => {
+      const messagesContainer = document.querySelector('.messagesContainer');
+      if (messagesContainer) {
+        messagesContainer.scrollTo({
+          top: messagesContainer.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
+    
   } catch (error) {
     showConfirmModal("Ошибка инициализации", "Произошла ошибка при инициализации чата", false);
   }
@@ -3128,6 +3657,23 @@ function joinChat(socket, username, userId, isAdmin = false, isModerator = false
   }));
   
   setTimeout(() => {
+    const easterEggFound = localStorage.getItem('easterEggFound');
+    const easterEggReward = localStorage.getItem('easterEggReward');
+    
+    if (easterEggFound && easterEggReward && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({
+        event: 'easterEggFound',
+        data: {
+          reward: easterEggReward
+        }
+      }));
+      
+      localStorage.removeItem('easterEggFound');
+      localStorage.removeItem('easterEggReward');
+    }
+  }, 1000);
+  
+  setTimeout(() => {
     if (document.getElementById('login-form').style.display !== 'none') {
       showConfirmModal(
         "Проблема с подключением", 
@@ -3311,6 +3857,12 @@ function handleWebSocketMessage(data) {
     case 'imageDataLoaded':
       handleImageDataLoaded(data.images || []);
       break;
+    case 'easterEggReward':
+      handleEasterEggReward(data);
+      break;
+    case 'easterEggAlreadyFound':
+      handleEasterEggAlreadyFound(data);
+      break;
     default:
   }
 }
@@ -3475,7 +4027,7 @@ function requestImagesForMessages(messages) {
   for (const msg of messages) {
     if (!msg || !Array.isArray(msg.files)) continue;
     msg.files.forEach((file, index) => {
-      if (file && typeof file.type === 'string' && (file.type.startsWith('image/') || file.type.startsWith('video/'))) {
+      if (file && typeof file.type === 'string' && (file.type.startsWith('image/') || file.type.startsWith('video/') || file.type.startsWith('audio/'))) {
         if (!file.data) {
           requests.push({ messageId: msg.id, fileIndex: index });
         }
@@ -3500,6 +4052,17 @@ function handleImageDataLoaded(images) {
     try { message.files[fileIndex].data = data; } catch (e) { }
     const wrapper = document.querySelector(`.messageWrapper[data-message-id="${messageId}"]`);
     if (!wrapper) continue;
+    
+    const audioPlaceholder = wrapper.querySelector(`.audioPlayer[data-message-id="${messageId}"][data-file-index="${fileIndex}"]`);
+    if (audioPlaceholder) {
+      const file = message.files[fileIndex];
+      if (file && file.type && file.type.startsWith('audio/')) {
+        const newAudioPlayer = createCustomAudioPlayer(file, null, null);
+        audioPlaceholder.replaceWith(newAudioPlayer);
+        continue;
+      }
+    }
+    
     const mediaContainer = wrapper.querySelector('.mediaContainer');
     if (mediaContainer) {
       const mediaElements = mediaContainer.querySelectorAll('img, video');
@@ -3861,6 +4424,8 @@ function checkNetworkStatus() {
 
 document.addEventListener('DOMContentLoaded', () => {
   
+  document.body.classList.add('registration-active');
+  
   const gifModal = document.getElementById('gif-modal');
   if (gifModal) {
     gifModal.style.display = 'none';
@@ -4209,6 +4774,7 @@ function startReplyToMessage(messageId) {
   const replyUsername = messageSenderElement.textContent || currentUser.username;
   
   const mediaContainer = messageWrapper.querySelector('.mediaContainer');
+  const audioPlayers = messageWrapper.querySelectorAll('.audioPlayer');
   let replyFiles = [];
   
   if (mediaContainer) {
@@ -4219,7 +4785,21 @@ function startReplyToMessage(messageId) {
         type: mediaElement.tagName.toLowerCase() === 'video' ? 'video' : 'image'
       });
     });
-  } else {
+  }
+  
+  if (audioPlayers.length > 0) {
+    audioPlayers.forEach(audioPlayer => {
+      const audioElement = audioPlayer.querySelector('audio');
+      if (audioElement) {
+        replyFiles.push({
+          src: audioElement.src,
+          type: 'audio'
+        });
+      }
+    });
+  }
+  
+  if (!mediaContainer && replyFiles.length === 0) {
     const messageFiles = messageWrapper.querySelectorAll('.messageFile');
     if (messageFiles.length > 0) {
       messageFiles.forEach(fileElement => {
@@ -4229,6 +4809,15 @@ function startReplyToMessage(messageId) {
             src: mediaPreview.src,
             type: mediaPreview.tagName.toLowerCase() === 'video' ? 'video' : 'image'
           });
+        } else {
+          // Обработка архивов и других файлов
+          const fileIcon = fileElement.querySelector('span');
+          if (fileIcon && fileIcon.textContent === '🗜️') {
+            replyFiles.push({
+              src: '',
+              type: 'archive'
+            });
+          }
         }
       });
     }
@@ -4268,15 +4857,31 @@ function showReplyIndicator(messageId, replyText, replyUsername, replyFiles = []
   let mediaPreview = '';
   if (replyFiles.length > 0) {
     const firstFile = replyFiles[0];
-    const mediaType = firstFile.type === 'video' ? 'video' : 'img';
-    mediaPreview = `<${mediaType} src="${firstFile.src}" class="replyMediaPreview"></${mediaType}>`;
+    if (firstFile.type === 'audio') {
+      mediaPreview = `<span class="replyMediaPreview" style="display: flex; align-items: center; justify-content: center; font-size: 20px;">🎵</span>`;
+    } else if (firstFile.type === 'archive') {
+      mediaPreview = `<span class="replyMediaPreview" style="display: flex; align-items: center; justify-content: center; font-size: 20px;">🗜️</span>`;
+    } else {
+      const mediaType = firstFile.type === 'video' ? 'video' : 'img';
+      mediaPreview = `<${mediaType} src="${firstFile.src}" class="replyMediaPreview"></${mediaType}>`;
+    }
   }
   
   let displayText = replyText;
   if (!displayText || displayText.trim() === '') {
     if (replyFiles.length > 0) {
       const firstFile = replyFiles[0];
-      displayText = firstFile.type === 'video' ? 'Видео' : 'Фото';
+      if (firstFile.type === 'audio') {
+        displayText = 'Аудио';
+      } else if (firstFile.type === 'video') {
+        displayText = 'Видео';
+      } else if (firstFile.type === 'image') {
+        displayText = 'Фото';
+      } else if (firstFile.type === 'archive') {
+        displayText = 'Архив';
+      } else {
+        displayText = 'Файл';
+      }
     } else {
       displayText = 'Сообщение';
     }
@@ -4380,6 +4985,40 @@ function ensureFilePreviewOrder() {
     }
   }
 }
+
+let lastGifResults = null;
+
+function handleEasterEggReward(data) {
+  if (window.showNotification) {
+    window.showNotification(data.message, 'success');
+  }
+  
+  if (window.createInfoCard) {
+    window.createInfoCard(
+      '🎁 Награда получена!',
+      'Вы получили специальный аватар за пасхалку!',
+      '<div style="text-align: center; margin: 20px 0;">' +
+      '<p>🌟 Новый аватар добавлен в вашу коллекцию!</p>' +
+      '<p>💎 Проверьте свои специальные аватары!</p>' +
+      '<div style="font-size: 2em; margin: 15px 0;">🎊 🎈 🎁</div>' +
+      '</div>'
+    );
+  }
+}
+
+function handleEasterEggAlreadyFound(data) {
+  if (window.showNotification) {
+    window.showNotification(data.message, 'info');
+  }
+}
+
+window.addEventListener('resize', () => {
+  if (lastGifResults && lastGifResults.length > 0) {
+    setTimeout(() => {
+      displayGifResultsModal(lastGifResults);
+    }, 100);
+  }
+});
 
 window.addAdminBadge = addAdminBadge;
 window.addModeratorBadge = addModeratorBadge;

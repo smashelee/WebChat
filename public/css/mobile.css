@@ -11,6 +11,20 @@ body, html {
 body {
   position: relative;
   overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-color) var(--background-color);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-color) var(--background-color);
+}
+
+#registration-container,
+.loginForm,
+.container {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-color) var(--background-color);
 }
 
 .mobile-users-button,
@@ -94,6 +108,22 @@ a,
     border-top: none;
   }
   
+  body.registration-active #chat-container {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  body.registration-active .sidebar,
+  body.registration-active .mainLayout,
+  body.registration-active .chatArea,
+  body.registration-active .sidebarHeader {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateX(-100%) !important;
+  }
+
   .sidebar {
     width: 80%;
     max-width: 280px;
@@ -714,6 +744,8 @@ a,
   .chatArea.keyboard-open {
     height: 100% !important;
     overflow: hidden;
+    transition: none !important;
+    transform: translateZ(0);
   }
   
   .chatHeader {
@@ -737,6 +769,8 @@ a,
     position: relative;
     z-index: 1;
     pointer-events: auto;
+    transition: none !important;
+    transform: translateZ(0);
   }
   
   .messagesContainer.input-focused {
@@ -757,6 +791,9 @@ a,
     z-index: 1000 !important;
     background-color: var(--card-background) !important;
     border-top: 1px solid var(--border-color) !important;
+    transition: none !important;
+    transform: translateZ(0);
+    will-change: auto;
   }
   
   body.keyboard-open {
@@ -1039,7 +1076,7 @@ a,
     bottom: 90px;
     right: 10px;
     width: 45px;
-    height: 40px;
+    height: 45px;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     user-select: none;
@@ -1058,12 +1095,6 @@ a,
     height: 32px;
   }
   
-  .scrollToBottomButton {
-    bottom: 90px;
-    right: 10px;
-    width: 45px;
-    height: 40px;
-  }
   
   .scrollToBottomButton svg {
     width: 20px;
@@ -1275,8 +1306,10 @@ a,
   }
   
   .replyMediaPreview {
-    width: 35px;
-    height: 35px;
+    width: 30px;
+    height: 30px;
+    filter: invert(1);
+    opacity: 0.7;
   }
   
   .replyIndicatorMain {
@@ -1316,6 +1349,38 @@ a,
   .loginForm {
     max-height: 90vh;
     overflow-y: auto;
+    width: 95%;
+    max-width: 320px;
+    padding: 15px;
+    margin: 10px;
+  }
+  
+  @media (max-width: 320px) {
+    .loginForm {
+      width: 98%;
+      max-width: 300px;
+      padding: 12px;
+      margin: 5px;
+      max-height: 95vh;
+    }
+    
+    .formHeader {
+      margin-bottom: 15px;
+    }
+    
+    .formGroup {
+      margin-bottom: 12px;
+    }
+    
+    .formInput {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    
+    .submitButton {
+      padding: 12px 16px;
+      font-size: 14px;
+    }
   }
   
   .messagesContainer {
@@ -1492,5 +1557,46 @@ body.input-focused {
   .notification-toast.user-activity .toast-name {
     position: relative;
     top: 1px;
+  }
+
+  .audioPlayer {
+    max-width: 100%;
+    padding: 10px;
+    margin: 6px 0;
+    border-radius: 10px;
+  }
+
+  .audioPlayerName {
+    font-size: 11px;
+    margin-bottom: 8px;
+  }
+
+  .audioPlayButton {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+  }
+
+  .audioPlayButton svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .audioPlayerControls {
+    gap: 10px;
+  }
+
+  .audioPlayerTime {
+    font-size: 10px;
+  }
+
+  .audioProgressBar {
+    height: 3px;
+  }
+
+  .audioProgressFill::after {
+    width: 10px;
+    height: 10px;
+    right: -5px;
   }
 }

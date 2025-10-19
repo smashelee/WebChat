@@ -122,7 +122,9 @@
 
               if (distance < maxMouseDistance) {
                   const opacity = (1 - distance / maxMouseDistance) * 0.6;
-                  ctx.strokeStyle = `rgba(100, 200, 255, ${opacity * globalAlphaCurrent})`;
+                  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color-rgb');
+                  const [r, g, b] = accentColor.split(',').map(c => parseInt(c.trim()));
+                  ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacity * globalAlphaCurrent})`;
                   ctx.lineWidth = 0.8;
                   ctx.beginPath();
                   ctx.moveTo(particles[i].x, particles[i].y);

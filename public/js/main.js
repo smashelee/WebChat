@@ -1,24 +1,6 @@
 function applyTheme(themeName) {
   document.documentElement.setAttribute('data-theme', themeName);
   
-  const singleColorThemes = [
-    'ruby-fire', 'orange-sunset', 'golden-sun', 'emerald-forest', 
-    'azure-sky', 'royal-indigo', 'violet-amethyst'
-  ];
-  const multiColorThemes = [
-    'aurora-borealis', 'ocean-depths', 'tropical-sunset', 'lavender-fields',
-    'spring-garden', 'copper-antique', 'arctic-aurora', 'cherry-blossom',
-    'lunar-symphony', 'desert-mirage', 'neon-dreams', 'crimson-sunset'
-  ];
-  
-  if (singleColorThemes.includes(themeName)) {
-    localStorage.setItem('savedSingleColorTheme', themeName);
-    localStorage.setItem('activeThemeCategory', 'single');
-  } else if (multiColorThemes.includes(themeName)) {
-    localStorage.setItem('savedMultiColorTheme', themeName);
-    localStorage.setItem('activeThemeCategory', 'multi');
-  }
-  
   localStorage.setItem('savedTheme', themeName);
   
   const customSelectTrigger = document.getElementById('custom-select-trigger');
@@ -39,18 +21,7 @@ function saveUsernameAndTheme(username, theme) {
 }
 
 function initApp() {
-  const activeCategory = localStorage.getItem('activeThemeCategory');
-  let savedTheme = null;
-  
-  if (activeCategory === 'single') {
-    savedTheme = localStorage.getItem('savedSingleColorTheme');
-  } else if (activeCategory === 'multi') {
-    savedTheme = localStorage.getItem('savedMultiColorTheme');
-  }
-  
-  if (!savedTheme) {
-    savedTheme = localStorage.getItem('savedTheme');
-  }
+  const savedTheme = localStorage.getItem('savedTheme');
   
   if (savedTheme) {
     applyTheme(savedTheme);
@@ -225,6 +196,9 @@ let isInteracting = false;
 let interactTimeout;
 let lastX, lastY;
 
+let startRotX = 0, startRotY = 0;
+let startMouseX = 0, startMouseY = 0;
+
 function updateCube() {
   cube.style.transform = `rotateX(${rotX + autoRotX}deg) rotateY(${rotY + autoRotY}deg)`;
 }
@@ -244,17 +218,24 @@ document.addEventListener('mousedown', (e) => {
     isInteracting = true;
     lastX = e.clientX;
     lastY = e.clientY;
+    
+    startRotX = rotX;
+    startRotY = rotY;
+    startMouseX = e.clientX;
+    startMouseY = e.clientY;
+    
+    e.preventDefault();
   }
 });
 
 document.addEventListener('mousemove', (e) => {
   if (!isInteracting) return;
   
-  const deltaX = e.clientY - lastY;
-  const deltaY = e.clientX - lastX;
+  const totalDeltaX = e.clientX - startMouseX;
+  const totalDeltaY = e.clientY - startMouseY;
   
-  rotX -= deltaX * 0.5;
-  rotY -= deltaY * 0.5;
+  rotX = startRotX - totalDeltaY * 0.5;
+  rotY = startRotY + totalDeltaX * 0.5;
   
   lastX = e.clientX;
   lastY = e.clientY;
@@ -270,29 +251,101 @@ cube.addEventListener('touchstart', (e) => {
   isInteracting = true;
   lastX = e.touches[0].clientX;
   lastY = e.touches[0].clientY;
-});
+  
+  startRotX = rotX;
+  startRotY = rotY;
+  startMouseX = e.touches[0].clientX;
+  startMouseY = e.touches[0].clientY;
+  
+  e.preventDefault(); 
+}, { passive: false });
 
 cube.addEventListener('touchmove', (e) => {
   if (!isInteracting) return;
   
-  const deltaX = e.touches[0].clientY - lastY;
-  const deltaY = e.touches[0].clientX - lastX;
+  const totalDeltaX = e.touches[0].clientX - startMouseX;
+  const totalDeltaY = e.touches[0].clientY - startMouseY;
   
-  rotX -= deltaX * 0.5;
-  rotY -= deltaY * 0.5;
+  rotX = startRotX - totalDeltaY * 0.5;
+  rotY = startRotY + totalDeltaX * 0.5;
   
   lastX = e.touches[0].clientX;
   lastY = e.touches[0].clientY;
   
+  e.preventDefault();
   updateCube();
-});
+}, { passive: false });
 
 cube.addEventListener('touchend', () => {
   isInteracting = false;
-});
+}, { passive: false });
 
 updateCube();
 startAutoRotate();
+
+function setupEasterEgg() {
+  const formTitle = document.querySelector('.formTitle');
+  if (formTitle) {
+    formTitle.style.cursor = 'pointer';
+    let clickCount = 0;
+    let resetTimeout = null;
+    
+    formTitle.addEventListener('click', () => {
+      clickCount++;
+      
+      if (resetTimeout) {
+        clearTimeout(resetTimeout);
+      }
+      
+      if (clickCount === 5) {
+        const easterEggFound = localStorage.getItem('easterEggFound');
+        if (easterEggFound) {
+          if (window.createInfoCard) {
+            window.createInfoCard(
+              '🎉 Пасхалка найдена!',
+              'Вы уже находили эту пасхалку ранее!',
+              '<div style="text-align: center; margin: 20px 0;">' +
+              '<p>🌟 Аватар уже был добавлен в вашу коллекцию!</p>' +
+              '<p>💎 Проверьте свои специальные аватары после входа в чат!</p>' +
+              '<div style="font-size: 2em; margin: 15px 0;">🎊 🎈 🎁</div>' +
+              '</div>'
+            );
+          }
+          clickCount = 0;
+          return;
+        }
+        
+        localStorage.setItem('easterEggFound', 'true');
+        localStorage.setItem('easterEggReward', 'Images/Avatars/Special/35.png');
+        
+        if (window.socket && window.socket.readyState === WebSocket.OPEN) {
+          window.socket.send(JSON.stringify({
+            event: 'easterEggFound',
+            data: {}
+          }));
+        }
+        
+        if (window.createInfoCard) {
+          window.createInfoCard(
+            '🎉 Пасхалка найдена!',
+            'Поздравляем! Вы нашли скрытую пасхалку в WebChat!',
+            '<div style="text-align: center; margin: 20px 0;">' +
+            '<p>🌟 Это секретная функция, которую мы спрятали для любопытных пользователей!</p>' +
+            '<p>💡 Вы кликнули ровно 5 раз подряд - это и есть секрет!</p>' +
+            '<p>🎯 Проверьте свои аватары - возможно, вы получили награду!</p>' +
+            '<div style="font-size: 2em; margin: 15px 0;">🎊 🎈 🎁</div>' +
+            '</div>'
+          );
+        }
+        clickCount = 0;
+      } else {
+        resetTimeout = setTimeout(() => {
+          clickCount = 0;
+        }, 1000);
+      }
+    });
+  }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   initApp();
@@ -300,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupThemeSelector();
   loadSavedData();
   setupLoginForm();
-  setupInteractiveCube();
+  setupEasterEgg();
   
   if (window.initNotificationSystem) {
     window.initNotificationSystem();

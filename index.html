@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a0f1f" id="theme-color-meta">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>WebChat</title>
   
   <link rel="icon" type="image/png" href="public/Images/web.png" style="filter: invert(1);">
@@ -49,14 +51,6 @@
     <h3 id="settings-title">Настройки</h3>
     <div class="formGroup">
       <label class="formLabel">Тема оформления</label>
-      <div class="theme-category-buttons">
-        <button id="single-color-btn" class="theme-category-btn active">
-          🎨 Одноцветные
-        </button>
-        <button id="multi-color-btn" class="theme-category-btn">
-          🌈 Многоцветные
-        </button>
-      </div>
       <div class="custom-select-wrapper">
         <div id="custom-select" class="custom-select">
           <div id="custom-select-trigger" class="custom-select__trigger">
@@ -128,7 +122,7 @@
     <form>
       <div class="formGroup">
         <label class="formLabel" for="username-input">Имя пользователя</label>
-        <input type="text" id="username-input" class="formInput" placeholder="Введите ваше имя" autocomplete="off" pattern="[a-zA-Z0-9_-]+" title="Только английские буквы, цифры, дефис и подчеркивание" maxlength="10">
+        <input type="text" id="username-input" class="formInput" placeholder="Введите ваше имя" autocomplete="off" pattern="[a-zA-Z0-9_\-]+" title="Только английские буквы, цифры, дефис и подчеркивание" maxlength="10">
       </div>
       
       <div class="formGroup">
@@ -148,7 +142,7 @@
         Войти
       </button>
       
-      <div class="version-info">Версия 0.0.63</div>
+      <div class="version-info">Версия 0.0.64</div>
       
       <div class="dev-info">
         <span class="lead-dev">Авторы: @smashelee</span> 
@@ -185,6 +179,11 @@
         
         <div class="messagesContainer"></div>
         <div id="typing-indicator" class="typingIndicator"></div>
+        <button id="scroll-to-bottom-button" class="scrollToBottomButton" title="Прокрутить вниз" style="display: none;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
         
         <div class="inputArea">
           <div class="messageInput">
@@ -222,22 +221,19 @@
             </div>
           </div>
         </div>
-        
-        <button id="scroll-to-bottom-button" class="scrollToBottomButton" title="Прокрутить вниз" style="display: none;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
       </div>
     </div>
   </div>
 
-  
-  <script src="public/js/main.js"></script>
+  <script src="public/js/tooltip.js"></script>
+  <script src="public/js/notifications.js"></script>
+  <script src="public/js/sounds.js"></script>
+  <script src="public/js/theme.js"></script>
   <script src="public/js/modals.js"></script>
-  <script src="public/js/cards.js"></script>
   <script src="public/js/socket.js"></script>
   <script src="public/js/mobile.js"></script>
+  <script src="public/js/main.js"></script>
+  <script src="public/js/cards.js"></script>
   <script src="public/js/particles.js"></script>
   
 </body>
